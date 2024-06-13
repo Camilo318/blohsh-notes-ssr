@@ -26,7 +26,9 @@ export const posts = createTable(
     title: varchar("title", { length: 256 }).notNull(),
     content: text("content").notNull(),
     category: varchar("category", { length: 100 }),
-    createdById: varchar("createdById", { length: 255 }).notNull(),
+    createdById: varchar("createdById", { length: 255 })
+      .notNull()
+      .references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -38,7 +40,10 @@ export const posts = createTable(
 );
 
 export const users = createTable("user", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+  id: text("id")
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   name: varchar("name", { length: 255 }),
   email: varchar("email", { length: 255 }).notNull(),
   emailVerified: timestamp("emailVerified", {

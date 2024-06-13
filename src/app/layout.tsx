@@ -1,6 +1,9 @@
 import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
+import { getServerSession } from "next-auth";
+import SessionProvider from "~/components/SessionProvider";
+import Header from "~/components/Header";
 
 export const metadata = {
   title: "Create T3 App",
@@ -8,14 +11,20 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession();
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body>{children}</body>
+      <body>
+        <SessionProvider session={session}>
+          <Header />
+          <main>{children}</main>
+        </SessionProvider>
+      </body>
     </html>
   );
 }
