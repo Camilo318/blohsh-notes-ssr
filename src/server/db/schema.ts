@@ -19,7 +19,7 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `blohsh-notes-ssr_${name}`);
 
-export const posts = createTable(
+export const notes = createTable(
   "note",
   {
     id: serial("id").primaryKey(),

@@ -1,9 +1,9 @@
 import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
-import { getServerSession } from "next-auth";
 import SessionProvider from "~/components/SessionProvider";
 import Header from "~/components/Header";
+import { getServerAuthSession } from "~/server/auth";
 
 export const metadata = {
   title: "Create T3 App",
@@ -16,13 +16,18 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession();
+  const session = await getServerAuthSession();
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body>
+      <body className="flex h-svh flex-col">
         <SessionProvider session={session}>
           <Header />
-          <main>{children}</main>
+          <main
+            className="bg-blohsh-beige flex-1
+          "
+          >
+            {children}
+          </main>
         </SessionProvider>
       </body>
     </html>

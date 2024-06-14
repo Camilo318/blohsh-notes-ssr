@@ -52,7 +52,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   },
-  secret: env.NEXTAUTH_SECRET,
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
