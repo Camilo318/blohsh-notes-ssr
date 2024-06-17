@@ -2,23 +2,23 @@
 
 import { useState, useId } from "react";
 import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { Input } from "./ui/input";
+import { createNote } from "~/server/mutations";
 
 export default function CreateNoteWizard() {
   const [collapsibleState, setCollapsibleState] = useState<"open" | "closed">(
     "closed",
   );
+  const [note, setNote] = useState({ title: "", content: "" });
 
   const collapsibleId = useId();
+
   return (
     <div className="shadow-3xl mx-auto mb-4 mt-8 min-h-11 max-w-[600px] rounded-lg border border-[#e0e0e0] bg-card">
       <div
-        className="px-4 py-3 data-[state=closed]:hidden"
         data-state={collapsibleState}
-      >
-        Title
-      </div>
-      <div
-        className="cursor-text px-4 py-3"
+        className="cursor-text px-4 py-3 data-[state=open]:hidden"
         aria-controls={collapsibleId}
         aria-expanded={collapsibleState === "open"}
         onClick={() => setCollapsibleState("open")}
@@ -28,12 +28,63 @@ export default function CreateNoteWizard() {
 
       <div
         data-state={collapsibleState}
-        className="flex justify-end px-3 pb-1 data-[state=closed]:hidden"
+        className="flex flex-col gap-3 px-4 py-4 data-[state=closed]:hidden"
         id={collapsibleId}
+        hidden={collapsibleState === "closed"}
       >
-        <Button variant={"ghost"} onClick={() => setCollapsibleState("closed")}>
-          Close
-        </Button>
+        {collapsibleState === "open" && (
+          <>
+            <Input
+              value={note.title}
+              onChange={(e) => {
+                setNote((prevNote) => ({
+                  ...prevNote,
+                  title: e.target.value,
+                }));
+              }}
+              aria-label="Note title"
+              className="py-3 placeholder:text-base data-[state=closed]:hidden"
+              data-state={collapsibleState}
+              placeholder="Title"
+            />
+
+            <div>
+              <Textarea
+                value={note.content}
+                onChange={(e) => {
+                  setNote((prevNote) => ({
+                    ...prevNote,
+                    content: e.target.value,
+                  }));
+                }}
+                aria-label="Note content"
+                placeholder="Create note"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={async () => {
+                  await createNote({ ...note, createdById: "" });
+
+                  setNote({
+                    title: "",
+                    content: "",
+                  });
+                  setCollapsibleState("closed");
+                }}
+              >
+                Create
+              </Button>
+              <Button
+                variant={"ghost"}
+                onClick={() => setCollapsibleState("closed")}
+              >
+                Close
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -11,7 +11,10 @@ export default async function Notes() {
     redirect("/api/auth/signin");
   }
 
-  const notes = await db.query.notes.findMany();
+  const userNotes = await db.query.notes.findMany({
+    where: (fields, { eq }) => eq(fields.createdById, session.user.id),
+    orderBy: (fields, { desc }) => desc(fields.createdAt),
+  });
 
   return (
     <section>
@@ -20,8 +23,8 @@ export default async function Notes() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3">
-        {[1, 2, 3].map((note, index) => (
-          <Note key={index} />
+        {userNotes.map((note) => (
+          <Note key={note.id} note={note} />
         ))}
       </div>
     </section>

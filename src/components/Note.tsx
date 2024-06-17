@@ -11,21 +11,23 @@ import {
 import { Button } from "./ui/button";
 import { Trash2Icon, EditIcon, ArchiveIcon, PaletteIcon } from "lucide-react";
 import { type ReactNode } from "react";
+import { type Note } from "~/server/mutations";
 
-export default function Note() {
+export default function Note({ note }: { note: Note }) {
+  const { title, content } = note;
   return (
-    <Card className="relative border-0 bg-transparent">
-      <div className="blohsh-border bg-blohsh-orange absolute inset-0"></div>
+    <Card className="group relative border-0 bg-transparent">
+      <div className="blohsh-border absolute inset-0 bg-blohsh-orange"></div>
 
-      <div className="blohsh-border group relative flex flex-col justify-around bg-card transition-transform hover:translate-x-3 hover:translate-y-3">
+      <div className="blohsh-border relative flex h-full flex-col justify-around bg-card transition-transform group-hover:translate-x-3 group-hover:translate-y-3">
         <CardHeader>
-          <CardTitle className="mb-1 text-xl font-bold">Card Title</CardTitle>
-          <CardDescription className="inline-block min-w-9 rounded-md px-1.5 py-1 text-xs font-semibold opacity-90">
+          <CardTitle className="mb-1 text-xl font-bold">{title}</CardTitle>
+          <CardDescription className="inline-block min-w-9 rounded-md py-1 text-xs font-semibold opacity-90">
             Card Description
           </CardDescription>
         </CardHeader>
         <CardContent className="mb-6 text-lg font-semibold">
-          <p>Card Content</p>
+          <p>{content}</p>
         </CardContent>
         <CardFooter className="flex items-center justify-around gap-2 pb-3 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
           <>
@@ -62,7 +64,7 @@ export default function Note() {
         variant="ghost"
         size="icon"
         onClick={onClick}
-        className="hover:bg-blohsh-hover rounded-[50%] opacity-70 hover:opacity-80"
+        className="rounded-[50%] opacity-70 hover:bg-blohsh-hover hover:opacity-80"
       >
         {children}
       </Button>
