@@ -10,10 +10,19 @@ import {
 } from "~/components/ui/card";
 import { Button } from "./ui/button";
 import { Trash2Icon, EditIcon, ArchiveIcon, PaletteIcon } from "lucide-react";
-import { type ReactNode } from "react";
-import { type Note } from "~/server/mutations";
+import { deleteNote, type NoteType } from "~/server/mutations";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
-export default function Note({ note }: { note: Note }) {
+export default function Note({ note }: { note: NoteType }) {
   const { title, content } = note;
   return (
     <Card className="group relative border-0 bg-transparent">
@@ -31,43 +40,46 @@ export default function Note({ note }: { note: Note }) {
         </CardContent>
         <CardFooter className="flex items-center justify-around gap-2 pb-3 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
           <>
-            <NoteButton>
-              <Trash2Icon className="h-[18px] w-[18px]" />
-            </NoteButton>
-            <NoteButton>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant={"ghost"} size={"icon"}>
+                  <Trash2Icon className="h-[18px] w-[18px]" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Are you absolutely sure?</DialogTitle>
+                </DialogHeader>
+                <DialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your note
+                </DialogDescription>
+
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button onClick={() => deleteNote(note.id)}>
+                      Yes, delete
+                    </Button>
+                  </DialogClose>
+
+                  <DialogClose asChild>
+                    <Button variant={"ghost"}>Cancel</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Button variant={"ghost"} size={"icon"}>
               <ArchiveIcon className="h-[18px] w-[18px]" />
-            </NoteButton>
-            <NoteButton>
+            </Button>
+            <Button variant={"ghost"} size={"icon"}>
               <PaletteIcon className="h-[18px] w-[18px]" />
-            </NoteButton>
-            <NoteButton>
+            </Button>
+            <Button variant={"ghost"} size={"icon"}>
               <EditIcon className="h-[18px] w-[18px]" />
-            </NoteButton>
+            </Button>
           </>
         </CardFooter>
       </div>
     </Card>
   );
-
-  function NoteButton({
-    children,
-
-    onClick = () => {
-      return;
-    },
-  }: {
-    children: ReactNode;
-    onClick?: () => void;
-  }) {
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onClick}
-        className="rounded-[50%] opacity-70 hover:bg-blohsh-hover hover:opacity-80"
-      >
-        {children}
-      </Button>
-    );
-  }
 }

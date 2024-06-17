@@ -15,7 +15,7 @@ export default function CreateNoteWizard() {
   const collapsibleId = useId();
 
   return (
-    <div className="shadow-3xl mx-auto mb-4 mt-8 min-h-11 max-w-[600px] rounded-lg border border-[#e0e0e0] bg-card">
+    <div className="mx-auto mb-4 mt-8 min-h-11 max-w-[600px] rounded-lg border border-[#e0e0e0] bg-card shadow-3xl">
       <div
         data-state={collapsibleState}
         className="cursor-text px-4 py-3 data-[state=open]:hidden"
@@ -64,6 +64,7 @@ export default function CreateNoteWizard() {
 
             <div className="flex justify-end gap-3">
               <Button
+                disabled={!note.content && !note.title}
                 onClick={async () => {
                   await createNote({ ...note, createdById: "" });
 

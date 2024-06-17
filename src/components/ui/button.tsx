@@ -30,6 +30,14 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
+    compoundVariants: [
+      {
+        variant: "ghost",
+        size: "icon",
+        className:
+          "rounded-[50%] opacity-70 hover:bg-blohsh-hover hover:opacity-80",
+      },
+    ],
   },
 );
 
