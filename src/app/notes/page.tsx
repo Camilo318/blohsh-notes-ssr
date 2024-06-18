@@ -22,6 +22,14 @@ export default async function Notes() {
         <CreateNoteWizard />
       </div>
 
+      {userNotes.length < 1 && (
+        <div className="h- flex h-96 items-center justify-center">
+          <h1 className="p-6 text-2xl font-bold text-blohsh-foreground">
+            Looks quite empty around here. Create a note above 😏
+          </h1>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3">
         {userNotes.map((note) => (
           <Note key={note.id} note={note} />

@@ -57,7 +57,10 @@ export default function Note({ note }: { note: NoteType }) {
 
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button onClick={() => deleteNote(note.id)}>
+                    <Button
+                      variant={"destructive"}
+                      onClick={() => deleteNote(note.id)}
+                    >
                       Yes, delete
                     </Button>
                   </DialogClose>

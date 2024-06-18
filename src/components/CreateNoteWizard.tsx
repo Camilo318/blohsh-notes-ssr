@@ -50,6 +50,7 @@ export default function CreateNoteWizard() {
 
             <div>
               <Textarea
+                autoFocus
                 value={note.content}
                 onChange={(e) => {
                   setNote((prevNote) => ({
