@@ -75,6 +75,12 @@
   }
 
   .blohsh-border {
-    @apply border-blohsh-border rounded-[10px] border-[3px];
+    @apply rounded-[10px] border-[3px] border-blohsh-border;
+  }
+}
+
+@layer components {
+  .feature {
+    @apply mx-auto my-40 text-3xl font-medium tracking-widest md:text-[2.5rem];
   }
 }

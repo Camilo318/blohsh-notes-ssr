@@ -38,7 +38,9 @@ const Header = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <button onClick={() => signIn()}>Sign in</button>
+        <button onClick={() => signIn(undefined, { callbackUrl: "/notes" })}>
+          Sign in
+        </button>
       )}
     </header>
   );
