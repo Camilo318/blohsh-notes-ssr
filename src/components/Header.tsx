@@ -33,7 +33,9 @@ const Header = () => {
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>
-              <button onClick={() => signOut()}>Sign out</button>
+              <button onClick={() => signOut({ callbackUrl: "/" })}>
+                Sign out
+              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

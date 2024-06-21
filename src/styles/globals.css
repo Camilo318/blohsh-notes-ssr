@@ -80,7 +80,8 @@
 }
 
 @layer components {
-  .feature {
+  .feature,
+  .secret {
     @apply mx-auto my-40 text-3xl font-medium tracking-widest md:text-[2.5rem];
   }
 }
