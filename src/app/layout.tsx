@@ -7,7 +7,7 @@ import { getServerAuthSession } from "~/server/auth";
 
 export const metadata = {
   title: "Blohsh Notes",
-  description: "Responsive ote taking app made with react server components",
+  description: "Responsive Note taking app made with React Server Components",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

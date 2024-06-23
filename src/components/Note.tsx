@@ -25,7 +25,7 @@ import {
 export default function Note({ note }: { note: NoteType }) {
   const { title, content } = note;
   return (
-    <Card className="group relative border-0 bg-transparent">
+    <Card className="note group relative border-0 bg-transparent">
       <div className="blohsh-border absolute inset-0 bg-blohsh-orange"></div>
 
       <div className="blohsh-border relative flex h-full flex-col justify-around bg-card transition-transform group-hover:translate-x-3 group-hover:translate-y-3">

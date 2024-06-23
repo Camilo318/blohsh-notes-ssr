@@ -3,6 +3,7 @@ import CreateNoteWizard from "~/components/CreateNoteWizard";
 import Note from "~/components/Note";
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
+import NotesContainer from "./notes";
 
 export default async function Notes() {
   const session = await getServerAuthSession();
@@ -30,11 +31,11 @@ export default async function Notes() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3">
+      <NotesContainer>
         {userNotes.map((note) => (
           <Note key={note.id} note={note} />
         ))}
-      </div>
+      </NotesContainer>
     </section>
   );
 }

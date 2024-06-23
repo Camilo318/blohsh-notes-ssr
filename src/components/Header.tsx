@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import Link from "next/link";
 
 const Header = () => {
   const { data: session } = useSession();
@@ -32,7 +33,10 @@ const Header = () => {
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href={"/notes"}>My notes</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="w-full cursor-pointer">
               <button onClick={() => signOut({ callbackUrl: "/" })}>
                 Sign out
               </button>

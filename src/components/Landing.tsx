@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -18,6 +19,7 @@ export function Landing() {
 
     features.forEach((feature) => {
       gsap.from(feature, {
+        ease: "power3.inOut",
         autoAlpha: 0,
         y: 41,
         duration: 0.88,
@@ -52,6 +54,9 @@ export function Landing() {
       });
     });
   });
+
+  const session = useSession();
+  const router = useRouter();
 
   return (
     <div className="p-3 text-center text-base text-blohsh-foreground md:text-xl">
@@ -112,7 +117,15 @@ export function Landing() {
       </div>
 
       <div className="mt-8 flex h-80 flex-wrap content-center items-center justify-center gap-4 rounded bg-blohsh-hover">
-        <Button onClick={() => signIn(undefined, { callbackUrl: "/notes" })}>
+        <Button
+          onClick={() => {
+            if (session.data?.user.id) {
+              router.push("/notes");
+            } else {
+              return signIn(undefined, { callbackUrl: "/notes" });
+            }
+          }}
+        >
           Get started now
         </Button>
         <p className="w-full">Capturing ideas has never been so fun</p>
