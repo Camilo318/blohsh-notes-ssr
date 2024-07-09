@@ -32,5 +32,27 @@ export const deleteNote = async (id: number) => {
     .delete(notes)
     .where(and(eq(notes.id, id), eq(notes.createdById, session.user.id)));
 
-  revalidatePath("/");
+  revalidatePath("/notes");
+};
+
+export const editTodo = async (note: FormData) => {
+  const session = await getServerAuthSession();
+
+  if (!session?.user.id) throw new Error("Unauthorized");
+
+  const title = note.get("title");
+  const content = note.get("content");
+  const id = note.get("id") as unknown;
+
+  await db
+    .update(notes)
+    .set({
+      title: title as string,
+      content: content as string,
+    })
+    .where(
+      and(eq(notes.id, id as number), eq(notes.createdById, session.user.id)),
+    );
+
+  revalidatePath("/notes");
 };

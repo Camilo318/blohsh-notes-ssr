@@ -13,14 +13,13 @@ export default function NotesContainer({
 
     gsap.from(notes, {
       autoAlpha: 0,
-      duration: 0.5,
-      y: 48,
+      y: 50,
       ease: "back.out",
       stagger: 0.1,
     });
   });
   return (
-    <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
       {children}
     </div>
   );

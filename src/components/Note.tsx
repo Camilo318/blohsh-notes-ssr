@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,7 +11,7 @@ import {
 } from "~/components/ui/card";
 import { Button } from "./ui/button";
 import { Trash2Icon, EditIcon, ArchiveIcon, PaletteIcon } from "lucide-react";
-import { deleteNote, type NoteType } from "~/server/mutations";
+import { deleteNote, editTodo, type NoteType } from "~/server/mutations";
 import {
   Dialog,
   DialogClose,
@@ -21,6 +22,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { cn } from "~/lib/utils";
+import { Textarea } from "./ui/textarea";
 
 export default function Note({ note }: { note: NoteType }) {
   const { title, content } = note;
@@ -77,12 +82,89 @@ export default function Note({ note }: { note: NoteType }) {
             <Button variant={"ghost"} size={"icon"}>
               <PaletteIcon className="h-[18px] w-[18px]" />
             </Button>
-            <Button variant={"ghost"} size={"icon"}>
-              <EditIcon className="h-[18px] w-[18px]" />
-            </Button>
+            <EditNoteWizard>
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    type="text"
+                    id="title"
+                    name="title"
+                    defaultValue={note.title}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="content">Content</Label>
+                  <Textarea
+                    id="content"
+                    name="content"
+                    defaultValue={note.content}
+                  />
+                </div>
+
+                <input name="id" type="hidden" value={note.id} hidden />
+                <DialogClose asChild>
+                  <Button type="submit">Save changes</Button>
+                </DialogClose>
+              </>
+            </EditNoteWizard>
           </>
         </CardFooter>
       </div>
     </Card>
+  );
+}
+
+const EditNoteWizard = ({ children }: { children: React.ReactElement }) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant={"ghost"} size={"icon"}>
+          <EditIcon className="h-[18px] w-[18px]" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit note</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Make changes to your note here. Click save when you&apos;re done.
+        </DialogDescription>
+        <ProfileForm>{children}</ProfileForm>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+//   return (
+//     <Drawer open={open} onOpenChange={setOpen}>
+//       <DrawerTrigger asChild>
+//         <Button variant="outline">Edit Profile</Button>
+//       </DrawerTrigger>
+//       <DrawerContent>
+//         <DrawerHeader className="text-left">
+//           <DrawerTitle>Edit profile</DrawerTitle>
+//           <DrawerDescription>
+//             Make changes to your profile here. Click save when you're done.
+//           </DrawerDescription>
+//         </DrawerHeader>
+//         <ProfileForm className="px-4" />
+//         <DrawerFooter className="pt-2">
+//           <DrawerClose asChild>
+//             <Button variant="outline">Cancel</Button>
+//           </DrawerClose>
+//         </DrawerFooter>
+//       </DrawerContent>
+//     </Drawer>
+//   );
+// };
+
+function ProfileForm({ className, children }: React.ComponentProps<"form">) {
+  return (
+    <form className={cn("grid items-start gap-4", className)} action={editTodo}>
+      {children}
+    </form>
   );
 }
