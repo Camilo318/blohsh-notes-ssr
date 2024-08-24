@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import SessionProvider from "~/components/SessionProvider";
 import Header from "~/components/Header";
 import { getServerAuthSession } from "~/server/auth";
+import Providers from "./providers";
 
 export const metadata = {
   title: "Blohsh Notes",
@@ -20,10 +21,12 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className="flex min-h-svh flex-col">
-        <SessionProvider session={session}>
-          <Header />
-          <main className="flex-1 bg-blohsh-beige/50">{children}</main>
-        </SessionProvider>
+        <Providers>
+          <SessionProvider session={session}>
+            <Header />
+            <main className="flex-1 bg-blohsh-beige/50">{children}</main>
+          </SessionProvider>
+        </Providers>
       </body>
     </html>
   );

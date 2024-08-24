@@ -15,12 +15,15 @@ export default function CreateNoteWizard() {
   const collapsibleId = useId();
 
   return (
-    <div className="mx-auto mb-4 mt-8 min-h-11 max-w-[600px] rounded-lg border border-[#e0e0e0] bg-card shadow-3xl">
+    <div
+      className="mx-auto mb-4 mt-8 min-h-11 max-w-[600px] rounded-lg border border-[#e0e0e0] bg-card shadow-3xl"
+      aria-expanded={collapsibleState === "open"}
+      data-state={collapsibleState}
+    >
       <div
         data-state={collapsibleState}
         className="cursor-text px-4 py-3 data-[state=open]:hidden"
         aria-controls={collapsibleId}
-        aria-expanded={collapsibleState === "open"}
         onClick={() => setCollapsibleState("open")}
       >
         Create a note

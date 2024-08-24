@@ -1,9 +1,13 @@
 import { redirect } from "next/navigation";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 import CreateNoteWizard from "~/components/CreateNoteWizard";
-import Note from "~/components/Note";
 import { getServerAuthSession } from "~/server/auth";
-import { db } from "~/server/db";
 import NotesContainer from "./notes";
+import { getNotesByUser } from "~/server/queries";
 
 export default async function Notes() {
   const session = await getServerAuthSession();
@@ -12,30 +16,20 @@ export default async function Notes() {
     redirect("/api/auth/signin");
   }
 
-  const userNotes = await db.query.notes.findMany({
-    where: (fields, { eq }) => eq(fields.createdById, session.user.id),
-    orderBy: (fields, { desc }) => desc(fields.createdAt),
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ["notes", session.user.id, ""],
+    queryFn: () => getNotesByUser(session.user.id, ""),
   });
 
   return (
-    <section>
-      <div className="px-4">
-        <CreateNoteWizard />
-      </div>
+    <section className="px-4">
+      <CreateNoteWizard />
 
-      {userNotes.length < 1 && (
-        <div className="h- flex h-96 items-center justify-center">
-          <h1 className="p-6 text-2xl font-bold text-blohsh-foreground">
-            Looks quite empty around here. Create a note above 😏
-          </h1>
-        </div>
-      )}
-
-      <NotesContainer>
-        {userNotes.map((note) => (
-          <Note key={note.id} note={note} />
-        ))}
-      </NotesContainer>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <NotesContainer user={session.user} />
+      </HydrationBoundary>
     </section>
   );
 }
