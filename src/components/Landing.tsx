@@ -64,8 +64,8 @@ export function Landing() {
         Accomplish more with better notes
       </h1>
       <h5 className="my-12 text-center text-base font-normal md:text-2xl">
-        <span className="font-semibold text-blohsh-orange">Blohsh Notes</span>{" "}
-        allows you to capture those ideas that came out of nowhere and find them
+        <span className="text-blohsh font-semibold">Blohsh Notes</span> allows
+        you to capture those ideas that came out of nowhere and find them
         quickly
       </h5>
 

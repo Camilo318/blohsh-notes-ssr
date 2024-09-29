@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -31,7 +28,7 @@ export default function Note({ note }: { note: NoteType }) {
   const { title, content } = note;
   return (
     <Card className="note group relative border-0 bg-transparent">
-      <div className="blohsh-border absolute inset-0 bg-blohsh-orange"></div>
+      <div className="blohsh-border bg-blohsh absolute inset-0"></div>
 
       <div className="blohsh-border relative flex h-full flex-col justify-around bg-card transition-transform group-hover:translate-x-3 group-hover:translate-y-3">
         <CardHeader>
@@ -82,89 +79,52 @@ export default function Note({ note }: { note: NoteType }) {
             <Button variant={"ghost"} size={"icon"}>
               <PaletteIcon className="h-[18px] w-[18px]" />
             </Button>
-            <EditNoteWizard>
-              <>
-                <div className="grid gap-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    type="text"
-                    id="title"
-                    name="title"
-                    defaultValue={note.title}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="content">Content</Label>
-                  <Textarea
-                    id="content"
-                    name="content"
-                    defaultValue={note.content}
-                  />
-                </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant={"ghost"} size={"icon"}>
+                  <EditIcon className="h-[18px] w-[18px]" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Edit note</DialogTitle>
+                </DialogHeader>
+                <DialogDescription>
+                  Make changes to your note here. Click save when you&apos;re
+                  done.
+                </DialogDescription>
+                <form
+                  className={cn("grid items-start gap-4")}
+                  action={editTodo}
+                >
+                  <div className="grid gap-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      type="text"
+                      id="title"
+                      name="title"
+                      defaultValue={note.title}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="content">Content</Label>
+                    <Textarea
+                      id="content"
+                      name="content"
+                      defaultValue={note.content}
+                    />
+                  </div>
 
-                <input name="id" type="hidden" value={note.id} hidden />
-                <DialogClose asChild>
-                  <Button type="submit">Save changes</Button>
-                </DialogClose>
-              </>
-            </EditNoteWizard>
+                  <input name="id" type="hidden" value={note.id} hidden />
+                  <DialogClose asChild>
+                    <Button type="submit">Save changes</Button>
+                  </DialogClose>
+                </form>
+              </DialogContent>
+            </Dialog>
           </>
         </CardFooter>
       </div>
     </Card>
-  );
-}
-
-const EditNoteWizard = ({ children }: { children: React.ReactElement }) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={"ghost"} size={"icon"}>
-          <EditIcon className="h-[18px] w-[18px]" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Edit note</DialogTitle>
-        </DialogHeader>
-        <DialogDescription>
-          Make changes to your note here. Click save when you&apos;re done.
-        </DialogDescription>
-        <ProfileForm>{children}</ProfileForm>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-//   return (
-//     <Drawer open={open} onOpenChange={setOpen}>
-//       <DrawerTrigger asChild>
-//         <Button variant="outline">Edit Profile</Button>
-//       </DrawerTrigger>
-//       <DrawerContent>
-//         <DrawerHeader className="text-left">
-//           <DrawerTitle>Edit profile</DrawerTitle>
-//           <DrawerDescription>
-//             Make changes to your profile here. Click save when you're done.
-//           </DrawerDescription>
-//         </DrawerHeader>
-//         <ProfileForm className="px-4" />
-//         <DrawerFooter className="pt-2">
-//           <DrawerClose asChild>
-//             <Button variant="outline">Cancel</Button>
-//           </DrawerClose>
-//         </DrawerFooter>
-//       </DrawerContent>
-//     </Drawer>
-//   );
-// };
-
-function ProfileForm({ className, children }: React.ComponentProps<"form">) {
-  return (
-    <form className={cn("grid items-start gap-4", className)} action={editTodo}>
-      {children}
-    </form>
   );
 }

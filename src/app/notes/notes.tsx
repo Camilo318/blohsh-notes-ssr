@@ -46,7 +46,7 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
       {isSuccess && userNotes.length < 1 && (
         <div className="flex h-96 items-center justify-center">
           <h1 className="p-6 text-2xl font-bold text-blohsh-foreground">
-            {searchQuery
+            {debouncedSearchQuery
               ? "No results found"
               : "Looks quite empty around here. Create a note above 😏"}
           </h1>

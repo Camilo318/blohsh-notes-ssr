@@ -20,11 +20,11 @@ const config = {
     extend: {
       colors: {
         blohsh: {
-          orange: "#f6ad55",
-          beige: "#feebc8",
-          foreground: "#2b2927",
-          border: "#585450",
-          hover: "rgba(95,99,104,0.157)",
+          DEFAULT: "hsl(var(--blohsh))",
+          secondary: "hsl(var(--blohsh-secondary))",
+          foreground: "hsl(var(--blohsh-foreground))",
+          border: "hsl(var(--blohsh-border))",
+          hover: "hsl(var(--blohsh-hover))",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
