@@ -24,7 +24,7 @@ export default async function RootLayout({
         <Providers>
           <SessionProvider session={session}>
             <Header />
-            <main className="bg-blohsh-secondary/50 flex-1">{children}</main>
+            <main className="bg-blohsh-secondary flex-1">{children}</main>
           </SessionProvider>
         </Providers>
       </body>

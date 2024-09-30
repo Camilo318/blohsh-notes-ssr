@@ -9,6 +9,7 @@ import { getNotesByUser } from "~/server/queries";
 import Note from "~/components/Note";
 import { Input } from "~/components/ui/input";
 import { useDebounce } from "~/lib/hooks/useDebounce";
+import CreateNoteWizard from "~/components/CreateNoteWizard";
 
 export default function NotesContainer({ user }: { user: Session["user"] }) {
   useGSAP(() => {
@@ -36,12 +37,13 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
 
   return (
     <>
-      <Input
-        className="col-span-full"
-        placeholder="Search notes"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
+      <div className="bg-blohsh-secondary sticky top-0 z-10 -mx-4 p-4">
+        <Input
+          placeholder="Search notes"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
 
       {isSuccess && userNotes.length < 1 && (
         <div className="flex h-96 items-center justify-center">
@@ -54,11 +56,14 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
       )}
 
       {isSuccess && userNotes.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
-          {userNotes.map((note) => (
-            <Note key={note.id} note={note} />
-          ))}
-        </div>
+        <>
+          <CreateNoteWizard />
+          <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
+            {userNotes.map((note) => (
+              <Note key={note.id} note={note} />
+            ))}
+          </div>
+        </>
       )}
     </>
   );
