@@ -5,6 +5,7 @@ import SessionProvider from "~/components/SessionProvider";
 import Header from "~/components/Header";
 import { getServerAuthSession } from "~/server/auth";
 import Providers from "./providers";
+import { ThemeProvider } from "~/components/ThemeProvider";
 
 export const metadata = {
   title: "Blohsh Notes",
@@ -22,10 +23,12 @@ export default async function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className="flex min-h-svh flex-col">
         <Providers>
-          <SessionProvider session={session}>
-            <Header />
-            <main className="bg-blohsh-secondary flex-1">{children}</main>
-          </SessionProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <SessionProvider session={session}>
+              <Header />
+              <main className="bg-blohsh-secondary flex-1">{children}</main>
+            </SessionProvider>
+          </ThemeProvider>
         </Providers>
       </body>
     </html>

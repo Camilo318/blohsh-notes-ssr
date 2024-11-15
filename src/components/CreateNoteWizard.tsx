@@ -16,7 +16,7 @@ export default function CreateNoteWizard() {
 
   return (
     <div
-      className="mx-auto min-h-11 w-full max-w-[600px] rounded-lg border border-[#e0e0e0] bg-card shadow-3xl"
+      className="mx-auto min-h-11 w-full max-w-[600px] rounded-lg border border-blohsh-border bg-card shadow-3xl"
       aria-expanded={collapsibleState === "open"}
       data-state={collapsibleState}
     >

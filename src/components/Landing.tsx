@@ -69,7 +69,7 @@ export function Landing() {
         quickly
       </h5>
 
-      <div className="mx-auto my-8 w-11/12 min-w-72 max-w-[800px] rounded-lg border border-blohsh-border bg-white text-blohsh-foreground">
+      <div className="mx-auto my-8 w-11/12 min-w-72 max-w-[800px] rounded-lg border border-blohsh-border bg-card text-blohsh-foreground">
         <p className="feature">Create notes</p>
         <p className="feature">Edit notes</p>
         <p className="feature">Delete notes</p>
