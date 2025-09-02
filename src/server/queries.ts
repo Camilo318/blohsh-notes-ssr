@@ -1,16 +1,12 @@
 "use server";
 
 import { db } from "./db";
+// import { images, notes } from "./db/schema";
+// import { eq, desc, ilike, or, and } from "drizzle-orm";
 
 export const getNotesByUser = async (userId: string, searchQuery = "") => {
-  // console.log(
-  //   `Fetching notes for user ${userId} with search query: "${searchQuery}"`,
-  // );
-
-  // await new Promise((resolve) => setTimeout(resolve, 500));
-
   try {
-    const notes = await db.query.notes.findMany({
+    const userNotes = await db.query.notes.findMany({
       with: {
         author: true,
         images: true,
@@ -28,9 +24,22 @@ export const getNotesByUser = async (userId: string, searchQuery = "") => {
       orderBy: (fields, { desc }) => desc(fields.createdAt),
     });
 
-    // console.log(`Fetched ${notes.length} notes`);
+    // const userNotes = await db
+    //   .select()
+    //   .from(notes)
+    //   .where(
+    //     and(
+    //       eq(notes.createdById, userId),
+    //       or(
+    //         ilike(notes.content, `%${searchQuery}%`),
+    //         ilike(notes.title, `%${searchQuery}%`),
+    //       ),
+    //     ),
+    //   )
+    //   .leftJoin(images, eq(notes.id, images.noteId))
+    //   .orderBy(desc(notes.createdAt));
 
-    return notes;
+    return userNotes;
   } catch (error) {
     console.error("Error fetching notes:", error);
     throw new Error("Failed to fetch notes");

@@ -43,17 +43,21 @@ export const notes = createTable(
 );
 
 export const images = createTable("images", {
-  id: text("id").$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   altText: text("atl_text"),
   contentType: text("content_type"),
   imageSrc: varchar("image_src", { length: 255 }),
   noteId: text("note_id")
     .notNull()
     .references(() => notes.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  userId: text("user_id").references(() => users.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
 });
 
 export const users = createTable("user", {
@@ -158,7 +162,10 @@ export type InsertUser = typeof users.$inferInsert;
 export type SelectUser = typeof users.$inferSelect;
 
 export type InserNote = typeof notes.$inferInsert;
-export type SelectNote = typeof notes.$inferSelect;
+
+export type SelectNote = typeof notes.$inferSelect & {
+  images?: SelectImage[];
+};
 
 export type InsertImage = typeof images.$inferInsert;
 export type SelectImage = typeof images.$inferSelect;
