@@ -10,11 +10,11 @@
     --card: 0 0% 100%;
     --card-foreground: 224 71% 4%;
 
-    --blohsh: 231 48% 48%;
-    --blohsh-secondary: 227 100% 97%;
-    --blohsh-foreground: 226 43% 10%;
-    --blohsh-border: 226 43% 25%;
-    --blohsh-hover: 226 43% 39% / 15%;
+    --blohsh: 231 48% 65%;
+    --blohsh-secondary: 227 100% 98%;
+    --blohsh-foreground: 226 43% 15%;
+    --blohsh-border: 226 43% 35%;
+    --blohsh-hover: 226 43% 49% / 12%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 224 71% 4%;
@@ -84,10 +84,6 @@
   }
   body {
     @apply bg-background text-foreground;
-  }
-
-  .blohsh-border {
-    @apply rounded-[10px] border-[3px] border-blohsh-border;
   }
 }
 

@@ -11,6 +11,10 @@ export const getNotesByUser = async (userId: string, searchQuery = "") => {
 
   try {
     const notes = await db.query.notes.findMany({
+      with: {
+        author: true,
+        images: true,
+      },
       where: (fields, { eq, and, ilike, or }) =>
         and(
           eq(fields.createdById, userId),

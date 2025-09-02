@@ -11,18 +11,9 @@ import { Input } from "~/components/ui/input";
 import { useDebounce } from "~/lib/hooks/useDebounce";
 import CreateNoteWizard from "~/components/CreateNoteWizard";
 
+gsap.registerPlugin(useGSAP);
+
 export default function NotesContainer({ user }: { user: Session["user"] }) {
-  useGSAP(() => {
-    const notes = gsap.utils.toArray<Element>(".note");
-
-    gsap.from(notes, {
-      autoAlpha: 0,
-      y: 50,
-      ease: "back.out",
-      stagger: 0.1,
-    });
-  });
-
   const [searchQuery, setSearchQuery] = useState("");
 
   const debouncedSearchQuery = useDebounce<typeof searchQuery>(
@@ -37,30 +28,32 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
 
   return (
     <>
-      <div className="bg-blohsh-secondary sticky top-0 z-10 -mx-4 p-4">
+      <div className="sticky top-0 z-10 -mx-4 bg-blohsh-secondary p-4">
         <Input
           placeholder="Search notes"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-
+      <CreateNoteWizard />
       {isSuccess && userNotes.length < 1 && (
         <div className="flex h-96 items-center justify-center">
-          <h1 className="p-6 text-2xl font-bold text-blohsh-foreground">
+          <h1 className="p-6 text-2xl font-semibold text-blohsh-foreground">
             {debouncedSearchQuery
               ? "No results found"
               : "Looks quite empty around here. Create a note above 😏"}
           </h1>
         </div>
       )}
-
       {isSuccess && userNotes.length > 0 && (
         <>
-          <CreateNoteWizard />
-          <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="container grid auto-rows-[max-content_1fr_max-content] grid-cols-1 gap-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
             {userNotes.map((note) => (
-              <Note key={note.id} note={note} />
+              <Note
+                key={note.id}
+                note={note}
+                className="row-span-3 grid grid-rows-subgrid"
+              />
             ))}
           </div>
         </>

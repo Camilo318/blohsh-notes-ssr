@@ -4,12 +4,9 @@ import { revalidatePath } from "next/cache";
 import { eq, and } from "drizzle-orm";
 import { getServerAuthSession } from "./auth";
 import { db } from "./db";
-import { notes } from "./db/schema";
+import { notes, type InserNote } from "./db/schema";
 
-export type Note = typeof notes.$inferInsert;
-export type NoteType = typeof notes.$inferSelect;
-
-export const createNote = async (note: Note) => {
+export const createNote = async (note: InserNote) => {
   const session = await getServerAuthSession();
 
   if (!session?.user.id) throw new Error("Unauthorized");
@@ -23,7 +20,7 @@ export const createNote = async (note: Note) => {
   revalidatePath("/notes");
 };
 
-export const deleteNote = async (id: number) => {
+export const deleteNote = async (id: string) => {
   const session = await getServerAuthSession();
 
   if (!session?.user.id) throw new Error("Unauthorized");
@@ -42,7 +39,7 @@ export const editTodo = async (note: FormData) => {
 
   const title = note.get("title");
   const content = note.get("content");
-  const id = note.get("id") as unknown;
+  const id = note.get("id") as string;
 
   await db
     .update(notes)
@@ -50,9 +47,7 @@ export const editTodo = async (note: FormData) => {
       title: title as string,
       content: content as string,
     })
-    .where(
-      and(eq(notes.id, id as number), eq(notes.createdById, session.user.id)),
-    );
+    .where(and(eq(notes.id, id), eq(notes.createdById, session.user.id)));
 
   revalidatePath("/notes");
 };

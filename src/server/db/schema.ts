@@ -4,7 +4,6 @@ import {
   integer,
   pgTableCreator,
   primaryKey,
-  serial,
   text,
   timestamp,
   varchar,
@@ -22,26 +21,43 @@ export const createTable = pgTableCreator((name) => `blohsh-notes-ssr_${name}`);
 export const notes = createTable(
   "note",
   {
-    id: serial("id").primaryKey(),
-    title: varchar("title", { length: 256 }).notNull(),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    title: varchar("title", { length: 255 }).notNull(),
     content: text("content").notNull(),
     category: varchar("category", { length: 100 }),
-    createdById: varchar("createdById", { length: 255 })
+    createdById: text("createdById")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt", { withTimezone: true }),
+    updatedAt: timestamp("updatedAt", { withTimezone: true })
+      .notNull()
+      .$onUpdate(() => new Date()),
   },
   (example) => ({
     createdByIdIdx: index("createdById_idx").on(example.createdById),
   }),
 );
 
+export const images = createTable("images", {
+  id: text("id").$defaultFn(() => crypto.randomUUID()),
+  altText: text("atl_text"),
+  contentType: text("content_type"),
+  imageSrc: varchar("image_src", { length: 255 }),
+  noteId: text("note_id")
+    .notNull()
+    .references(() => notes.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  userId: text("user_id").references(() => users.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
+});
+
 export const users = createTable("user", {
   id: text("id")
-    .notNull()
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: varchar("name", { length: 255 }),
@@ -55,6 +71,18 @@ export const users = createTable("user", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  notes: many(notes),
+  images: many(images),
+}));
+
+export const notesRelations = relations(notes, ({ one, many }) => ({
+  author: one(users, { fields: [notes.createdById], references: [users.id] }),
+  images: many(images),
+}));
+
+export const imagesRelations = relations(images, ({ one }) => ({
+  note: one(notes, { fields: [images.noteId], references: [notes.id] }),
+  user: one(users, { fields: [images.userId], references: [users.id] }),
 }));
 
 export const accounts = createTable(
@@ -125,3 +153,12 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   }),
 );
+
+export type InsertUser = typeof users.$inferInsert;
+export type SelectUser = typeof users.$inferSelect;
+
+export type InserNote = typeof notes.$inferInsert;
+export type SelectNote = typeof notes.$inferSelect;
+
+export type InsertImage = typeof images.$inferInsert;
+export type SelectImage = typeof images.$inferSelect;

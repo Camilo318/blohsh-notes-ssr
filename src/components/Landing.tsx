@@ -30,28 +30,28 @@ export function Landing() {
           // markers: true,
         },
       });
+    });
 
-      gsap.to(".secure-1", {
-        text: {
-          value: "secure",
-        },
-        scrollTrigger: {
-          trigger: ".secure-1",
-          start: "bottom center",
-          toggleActions: "restart none none reverse",
-        },
-      });
+    gsap.to(".secure-1", {
+      text: {
+        value: "secure",
+      },
+      scrollTrigger: {
+        trigger: ".secure-1",
+        start: "bottom center",
+        toggleActions: "restart none none reverse",
+      },
+    });
 
-      gsap.to(".secure-2", {
-        text: {
-          value: "safe",
-        },
-        scrollTrigger: {
-          trigger: ".secure-2",
-          start: "bottom center",
-          toggleActions: "restart none none reverse",
-        },
-      });
+    gsap.to(".secure-2", {
+      text: {
+        value: "safe",
+      },
+      scrollTrigger: {
+        trigger: ".secure-2",
+        start: "bottom center",
+        toggleActions: "restart none none reverse",
+      },
     });
   });
 
@@ -64,7 +64,7 @@ export function Landing() {
         Accomplish more with better notes
       </h1>
       <h5 className="my-12 text-center text-base font-normal md:text-2xl">
-        <span className="text-blohsh font-semibold">Blohsh Notes</span> allows
+        <span className="font-semibold text-blohsh">Blohsh Notes</span> allows
         you to capture those ideas that came out of nowhere and find them
         quickly
       </h5>
