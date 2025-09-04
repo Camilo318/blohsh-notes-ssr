@@ -26,7 +26,7 @@ export const ourFileRouter = {
       }),
     )
     // Set permissions and file types for this FileRoute
-    .middleware(async ({ req, input }) => {
+    .middleware(async ({ input }) => {
       // This code runs on your server before upload
       const session = await getServerAuthSession();
 
@@ -46,6 +46,7 @@ export const ourFileRouter = {
         userId: metadata.userId,
         noteId: metadata.noteId,
         imageSrc: file.url,
+        key: file.key,
         contentType: file.type,
         altText: file.name,
       });

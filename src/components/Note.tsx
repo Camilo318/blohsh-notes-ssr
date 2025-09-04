@@ -14,7 +14,7 @@ import {
   PaletteIcon,
   ImagePlus,
 } from "lucide-react";
-import { deleteNote, editTodo } from "~/server/mutations";
+import { deleteImage, deleteNote, editTodo } from "~/server/mutations";
 import {
   Dialog,
   DialogClose,
@@ -25,11 +25,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { cn } from "~/lib/utils";
-import { Textarea } from "./ui/textarea";
-import { type SelectNote } from "~/server/db/schema";
+import { type SelectImage, type SelectNote } from "~/server/db/schema";
 
 import {
   useState,
@@ -65,6 +63,7 @@ const Note = forwardRef<
   >([]);
 
   const noteImages = [...(note.images ?? []), ...placeholderImages];
+  const noteImageKeys = note.images?.map((image) => image.key ?? "") ?? [];
 
   return (
     <Card
@@ -80,7 +79,7 @@ const Note = forwardRef<
             {noteImages.map((image) => (
               <Image
                 key={image.id}
-                className="min-w-0 flex-1 object-cover object-center duration-300 ease-in-out animate-in fade-in zoom-in-75"
+                className="min-w-0 flex-1 object-cover object-center duration-300 ease-in-out animate-in fade-in zoom-in-125"
                 src={image.imageSrc ?? ""}
                 alt={image.altText ?? ""}
                 width={300}
@@ -105,7 +104,7 @@ const Note = forwardRef<
 
       <CardFooter className="flex items-center justify-around gap-2 pb-3 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
         <>
-          <DeleteNoteDialog noteId={note.id} />
+          <DeleteNoteDialog noteId={note.id} noteImageKeys={noteImageKeys} />
 
           <Button variant={"ghost"} size={"icon"}>
             <ArchiveIcon className="h-[18px] w-[18px]" />
@@ -120,11 +119,7 @@ const Note = forwardRef<
             setPlaceholderImages={setPlaceholderImages}
           />
 
-          <EditNoteDialog
-            noteId={note.id}
-            title={note.title}
-            content={note.content}
-          />
+          <EditNoteDialog note={note} />
         </>
       </CardFooter>
     </Card>
@@ -135,7 +130,13 @@ Note.displayName = "Note";
 
 export default Note;
 
-const DeleteNoteDialog = ({ noteId }: { noteId: string }) => {
+const DeleteNoteDialog = ({
+  noteId,
+  noteImageKeys,
+}: {
+  noteId: string;
+  noteImageKeys: string[];
+}) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -153,7 +154,10 @@ const DeleteNoteDialog = ({ noteId }: { noteId: string }) => {
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant={"destructive"} onClick={() => deleteNote(noteId)}>
+            <Button
+              variant={"destructive"}
+              onClick={() => deleteNote(noteId, noteImageKeys ?? [])}
+            >
               Yes, delete
             </Button>
           </DialogClose>
@@ -167,15 +171,8 @@ const DeleteNoteDialog = ({ noteId }: { noteId: string }) => {
   );
 };
 
-const EditNoteDialog = ({
-  noteId,
-  title,
-  content,
-}: {
-  noteId: string;
-  title: string;
-  content: string;
-}) => {
+const EditNoteDialog = ({ note }: { note: SelectNote }) => {
+  const { title, content, id: noteId, images: noteImages } = note;
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -183,30 +180,76 @@ const EditNoteDialog = ({
           <EditIcon className="h-[18px] w-[18px]" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        data-show-images={noteImages && noteImages.length > 0}
+        className="max-h-[90dvh]  gap-2 overflow-hidden p-0 data-[show-images=true]:grid-rows-[minmax(auto,200px)_1fr] sm:max-w-[425px]"
+      >
         <DialogHeader>
-          <DialogTitle>Edit note</DialogTitle>
+          <div className="flex min-h-0 flex-1 gap-1 data-[show-images=true]:hidden">
+            {noteImages?.map((image) => (
+              <ImageViewer key={image.id} image={image} />
+            ))}
+          </div>
         </DialogHeader>
-        <DialogDescription>
-          Make changes to your note here. Click save when you&apos;re done.
-        </DialogDescription>
-        <form className={cn("grid items-start gap-4")} action={editTodo}>
-          <div className="grid gap-2">
-            <Label htmlFor="title">Title</Label>
-            <Input type="text" id="title" name="title" defaultValue={title} />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="content">Content</Label>
-            <Textarea id="content" name="content" defaultValue={content} />
-          </div>
 
-          <input name="id" type="hidden" value={noteId} hidden />
-          <DialogClose asChild>
-            <Button type="submit">Save changes</Button>
-          </DialogClose>
-        </form>
+        <div className="overflow-y-auto p-4">
+          <form className={cn("grid items-start gap-4")} action={editTodo}>
+            <div className="grid gap-2">
+              <Input
+                id="title"
+                name="title"
+                defaultValue={title}
+                hidden={true}
+                type="hidden"
+              />
+              <h3 className="text-lg font-semibold">{title}</h3>
+            </div>
+            <div className="grid gap-2">
+              <Input
+                id="content"
+                name="content"
+                defaultValue={content}
+                hidden={true}
+                type="hidden"
+              />
+              <p className="whitespace-pre-line text-pretty break-words">
+                {content}
+              </p>
+            </div>
+
+            <input name="id" type="hidden" value={noteId} hidden />
+            <DialogClose asChild>
+              <Button type="submit">Save changes</Button>
+            </DialogClose>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const ImageViewer = ({ image }: { image: SelectImage }) => {
+  return (
+    <div className="group relative flex min-w-0 flex-1 overflow-hidden">
+      <Button
+        variant={"ghost"}
+        size={"icon"}
+        className="absolute bottom-0 right-0 z-10 bg-slate-700/50 text-white/75 opacity-0 transition-opacity duration-300 ease-in-out hover:bg-slate-700/100 hover:text-white focus-visible:opacity-100 group-hover:opacity-100"
+        aria-label={`Delete image ${image.altText}`}
+        title={`Delete image ${image.altText}`}
+        onClick={() => deleteImage(image.id, image.key ?? "")}
+      >
+        <Trash2Icon className="h-[18px] w-[18px]" aria-hidden="true" />
+      </Button>
+      <Image
+        key={image.id}
+        className="h-full min-w-0 flex-1 object-cover object-center transition-transform duration-300 ease-in-out animate-in fade-in zoom-in-125 group-hover:scale-105"
+        src={image.imageSrc ?? ""}
+        alt={image.altText ?? ""}
+        width={300}
+        height={300}
+      />
+    </div>
   );
 };
 

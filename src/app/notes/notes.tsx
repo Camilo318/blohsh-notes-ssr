@@ -47,7 +47,7 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
       )}
       {isSuccess && userNotes.length > 0 && (
         <>
-          <div className="container grid auto-rows-[max-content_1fr_max-content] grid-cols-1 gap-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="container grid auto-rows-[max-content_1fr_max-content] grid-cols-1 gap-4 px-0 py-4 sm:grid-cols-2 sm:px-4 lg:grid-cols-3">
             {userNotes.map((note) => (
               <Note
                 key={note.id}

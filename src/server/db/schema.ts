@@ -49,6 +49,7 @@ export const images = createTable("images", {
   altText: text("atl_text"),
   contentType: text("content_type"),
   imageSrc: varchar("image_src", { length: 255 }),
+  key: varchar("key", { length: 255 }),
   noteId: text("note_id")
     .notNull()
     .references(() => notes.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -58,6 +59,9 @@ export const images = createTable("images", {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
 
 export const users = createTable("user", {
