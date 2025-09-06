@@ -28,7 +28,7 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
 
   return (
     <>
-      <div className="sticky top-0 z-10 -mx-4 bg-blohsh-secondary p-4">
+      <div className="-mx-4 bg-blohsh-secondary p-4">
         <Input
           placeholder="Search notes"
           value={searchQuery}

@@ -3,9 +3,11 @@ import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import SessionProvider from "~/components/SessionProvider";
 import Header from "~/components/Header";
+import AppSidebar from "~/components/AppSidebar";
 import { getServerAuthSession } from "~/server/auth";
 import Providers from "./providers";
 import { ThemeProvider } from "~/components/ThemeProvider";
+import { SidebarProvider, SidebarInset } from "~/components/ui/sidebar";
 
 export const metadata = {
   title: "Blohsh Notes",
@@ -25,8 +27,15 @@ export default async function RootLayout({
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <SessionProvider session={session}>
-              <Header />
-              <main className="bg-blohsh-secondary flex-1">{children}</main>
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                  <Header />
+                  <section className="flex-1 bg-blohsh-secondary">
+                    {children}
+                  </section>
+                </SidebarInset>
+              </SidebarProvider>
             </SessionProvider>
           </ThemeProvider>
         </Providers>
