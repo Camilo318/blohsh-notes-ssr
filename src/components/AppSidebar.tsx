@@ -36,22 +36,22 @@ const AppSidebar = () => {
     {
       title: "All notes",
       icon: BookOpen,
-      href: "/notes",
+      href: "/home",
     },
     {
       title: "Favorites",
       icon: Bookmark,
-      href: "/favorites",
+      href: "/home/favorites",
     },
     {
       title: "Recent notes",
       icon: Clock,
-      href: "/recent",
+      href: "/home/recent",
     },
     {
       title: "Tags",
       icon: Tag,
-      href: "/tags",
+      href: "/home/tags",
     },
   ];
 
@@ -59,17 +59,17 @@ const AppSidebar = () => {
     {
       title: "Notebooks",
       icon: NotebookPen,
-      href: "/notebooks",
+      href: "/home/notebooks",
     },
     {
       title: "Projects",
       icon: Grid3X3,
-      href: "/projects",
+      href: "/home/projects",
     },
     {
       title: "Shared",
       icon: Share,
-      href: "/shared",
+      href: "/home/shared",
     },
   ];
 
@@ -77,12 +77,12 @@ const AppSidebar = () => {
     {
       title: "Settings",
       icon: Settings,
-      href: "/settings",
+      href: "/home/settings",
     },
     {
       title: "Sync Status",
       icon: RefreshCw,
-      href: "/sync",
+      href: "/home/sync",
     },
   ];
 

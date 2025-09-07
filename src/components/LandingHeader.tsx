@@ -9,25 +9,32 @@ import {
 import { Button } from "~/components/ui/button";
 import { MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 
-import { SidebarTrigger } from "./ui/sidebar";
-
-const Header = () => {
+const LandingHeader = () => {
   const { data: session } = useSession();
-
+  const router = useRouter();
   return (
-    <header className="flex h-16 items-center justify-between border-b p-3">
-      <SidebarTrigger />
+    <header className="flex items-center justify-between p-3">
       <div className="text-xl font-bold">Blohsh Notes</div>
 
       {session ? (
         <div className="flex items-center gap-2">
           <ModeToggle />
+          <Button variant="outline" onClick={() => router.push("/home")}>
+            My notes
+          </Button>
         </div>
       ) : (
-        <button onClick={() => signIn(undefined, { callbackUrl: "/home" })}>
-          Sign in
-        </button>
+        <div className="flex items-center gap-2">
+          <ModeToggle />
+          <Button
+            onClick={() => signIn(undefined, { callbackUrl: "/home" })}
+            variant="outline"
+          >
+            Sign in
+          </Button>
+        </div>
       )}
     </header>
   );
@@ -69,4 +76,4 @@ export function ModeToggle() {
   );
 }
 
-export default Header;
+export default LandingHeader;
