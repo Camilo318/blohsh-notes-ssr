@@ -92,7 +92,7 @@ const AppSidebar = () => {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="border-b">
         <NavUser
           user={{
             name: session?.user?.name ?? "",
@@ -102,8 +102,6 @@ const AppSidebar = () => {
           signOut={() => signOut({ callbackUrl: "/" })}
         />
       </SidebarHeader>
-
-      <SidebarSeparator />
 
       <SidebarContent>
         <SidebarGroup>

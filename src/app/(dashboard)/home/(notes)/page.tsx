@@ -23,7 +23,7 @@ export default async function Notes() {
   });
 
   return (
-    <section className="relative grid gap-3 px-4 pt-4">
+    <section className="@container/note-grid relative grid gap-3 px-4 pt-4">
       <HydrationBoundary state={dehydrate(queryClient)}>
         <NotesContainer user={session.user} />
       </HydrationBoundary>

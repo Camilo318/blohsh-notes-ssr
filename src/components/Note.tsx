@@ -1,3 +1,17 @@
+import { forwardRef } from "react";
+import Image from "next/image";
+import { formatDistanceToNow } from "date-fns";
+import {
+  ArchiveIcon,
+  EditIcon,
+  ImagePlus,
+  PaletteIcon,
+  Trash2Icon,
+} from "lucide-react";
+
+import { cn } from "~/lib/utils";
+import { type SelectNote } from "~/server/db/schema";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,75 +20,31 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Button } from "./ui/button";
-import {
-  Trash2Icon,
-  EditIcon,
-  ArchiveIcon,
-  PaletteIcon,
-  ImagePlus,
-} from "lucide-react";
-import { deleteImage, deleteNote, editTodo } from "~/server/mutations";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import { Input } from "./ui/input";
-import { cn } from "~/lib/utils";
-import { type SelectImage, type SelectNote } from "~/server/db/schema";
-
-import {
-  useState,
-  forwardRef,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
-import Image from "next/image";
-import { formatDistanceToNow } from "date-fns";
-import { UploadDropzone } from "./uploadthing";
-import { useRouter } from "next/navigation";
-
-type PlaceholderImage = {
-  id: string;
-  noteId: string;
-  altText: string;
-  imageSrc: string;
-  contentType: string;
-};
 
 const Note = forwardRef<
   HTMLDivElement,
   {
     note: SelectNote;
     className?: string;
+    openDeleteDialog: (noteId: string, noteImageKeys: string[]) => void;
+    openAddImageDialog: (noteId: string) => void;
   }
->(({ note, className }, ref) => {
+>(({ note, className, openDeleteDialog, openAddImageDialog }, ref) => {
   const { title, content } = note;
 
-  // these are placeholder images, once the user uploads images, they will come from the note (left join)
-  const [placeholderImages, setPlaceholderImages] = useState<
-    PlaceholderImage[]
-  >([]);
-
-  const noteImages = [...(note.images ?? []), ...placeholderImages];
+  const noteImages = [...(note.images ?? [])];
   const noteImageKeys = note.images?.map((image) => image.key ?? "") ?? [];
 
   return (
     <Card
       ref={ref}
       className={cn(
-        "group relative overflow-hidden transition-all hover:translate-x-2 hover:translate-y-2",
+        "group relative overflow-hidden transition-transform ease-in-out hover:scale-105",
         className,
       )}
     >
       <CardHeader className="p-0">
-        {noteImages.length > 0 && (
+        {/* {noteImages.length > 0 && (
           <div className="flex h-40 min-h-0 gap-1">
             {noteImages.map((image) => (
               <Image
@@ -87,7 +57,7 @@ const Note = forwardRef<
               />
             ))}
           </div>
-        )}
+        )} */}
         <CardTitle className="mb-1 px-6 pt-6">{title}</CardTitle>
         <CardDescription className="inline-block min-w-9 rounded-md px-6 py-1 text-xs font-semibold opacity-90">
           {formatDistanceToNow(new Date(note.createdAt), {
@@ -104,7 +74,13 @@ const Note = forwardRef<
 
       <CardFooter className="flex items-center justify-around gap-2 pb-3 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
         <>
-          <DeleteNoteDialog noteId={note.id} noteImageKeys={noteImageKeys} />
+          <Button
+            variant={"ghost"}
+            size={"icon"}
+            onClick={() => openDeleteDialog(note.id, noteImageKeys)}
+          >
+            <Trash2Icon className="h-[18px] w-[18px]" />
+          </Button>
 
           <Button variant={"ghost"} size={"icon"}>
             <ArchiveIcon className="h-[18px] w-[18px]" />
@@ -114,12 +90,17 @@ const Note = forwardRef<
             <PaletteIcon className="h-[18px] w-[18px]" />
           </Button>
 
-          <AddNoteImageDialog
-            noteId={note.id}
-            setPlaceholderImages={setPlaceholderImages}
-          />
+          <Button
+            variant={"ghost"}
+            size={"icon"}
+            onClick={() => openAddImageDialog(note.id)}
+          >
+            <ImagePlus className="h-[18px] w-[18px]" />
+          </Button>
 
-          <EditNoteDialog note={note} />
+          <Button variant={"ghost"} size={"icon"}>
+            <EditIcon className="h-[18px] w-[18px]" />
+          </Button>
         </>
       </CardFooter>
     </Card>
@@ -129,179 +110,3 @@ const Note = forwardRef<
 Note.displayName = "Note";
 
 export default Note;
-
-const DeleteNoteDialog = ({
-  noteId,
-  noteImageKeys,
-}: {
-  noteId: string;
-  noteImageKeys: string[];
-}) => {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant={"ghost"} size={"icon"}>
-          <Trash2Icon className="h-[18px] w-[18px]" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
-        </DialogHeader>
-        <DialogDescription>
-          This action cannot be undone. This will permanently delete your note
-        </DialogDescription>
-
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button
-              variant={"destructive"}
-              onClick={() => deleteNote(noteId, noteImageKeys ?? [])}
-            >
-              Yes, delete
-            </Button>
-          </DialogClose>
-
-          <DialogClose asChild>
-            <Button variant={"ghost"}>Cancel</Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const EditNoteDialog = ({ note }: { note: SelectNote }) => {
-  const { title, content, id: noteId, images: noteImages } = note;
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant={"ghost"} size={"icon"}>
-          <EditIcon className="h-[18px] w-[18px]" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent
-        data-show-images={noteImages && noteImages.length > 0}
-        className="max-h-[90dvh]  gap-2 overflow-hidden p-0 data-[show-images=true]:grid-rows-[minmax(auto,200px)_1fr] sm:max-w-[425px]"
-      >
-        <DialogHeader>
-          <div className="flex min-h-0 flex-1 gap-1 data-[show-images=true]:hidden">
-            {noteImages?.map((image) => (
-              <ImageViewer key={image.id} image={image} />
-            ))}
-          </div>
-        </DialogHeader>
-
-        <div className="overflow-y-auto p-4">
-          <form className={cn("grid items-start gap-4")} action={editTodo}>
-            <div className="grid gap-2">
-              <Input
-                id="title"
-                name="title"
-                defaultValue={title}
-                hidden={true}
-                type="hidden"
-              />
-              <h3 className="text-lg font-semibold">{title}</h3>
-            </div>
-            <div className="grid gap-2">
-              <Input
-                id="content"
-                name="content"
-                defaultValue={content}
-                hidden={true}
-                type="hidden"
-              />
-              <p className="whitespace-pre-line text-pretty break-words">
-                {content}
-              </p>
-            </div>
-
-            <input name="id" type="hidden" value={noteId} hidden />
-            <DialogClose asChild>
-              <Button type="submit">Save changes</Button>
-            </DialogClose>
-          </form>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const ImageViewer = ({ image }: { image: SelectImage }) => {
-  return (
-    <div className="group relative flex min-w-0 flex-1 overflow-hidden">
-      <Button
-        variant={"ghost"}
-        size={"icon"}
-        className="absolute bottom-0 right-0 z-10 bg-slate-700/50 text-white/75 opacity-0 transition-opacity duration-300 ease-in-out hover:bg-slate-700/100 hover:text-white focus-visible:opacity-100 group-hover:opacity-100"
-        aria-label={`Delete image ${image.altText}`}
-        title={`Delete image ${image.altText}`}
-        onClick={() => deleteImage(image.id, image.key ?? "")}
-      >
-        <Trash2Icon className="h-[18px] w-[18px]" aria-hidden="true" />
-      </Button>
-      <Image
-        key={image.id}
-        className="h-full min-w-0 flex-1 object-cover object-center transition-transform duration-300 ease-in-out animate-in fade-in zoom-in-125 group-hover:scale-105"
-        src={image.imageSrc ?? ""}
-        alt={image.altText ?? ""}
-        width={300}
-        height={300}
-      />
-    </div>
-  );
-};
-
-const AddNoteImageDialog = ({
-  noteId,
-  setPlaceholderImages,
-}: {
-  noteId: string;
-  setPlaceholderImages: Dispatch<SetStateAction<PlaceholderImage[]>>;
-}) => {
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={"ghost"} size={"icon"}>
-          <ImagePlus className="h-[18px] w-[18px]" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add image</DialogTitle>
-          <DialogDescription>Add an image to your note</DialogDescription>
-        </DialogHeader>
-        <UploadDropzone
-          input={{ noteId }}
-          endpoint="imageUploader"
-          onBeforeUploadBegin={(files) => {
-            const images: PlaceholderImage[] = files.map((file) => ({
-              // this is a placeholder id, the actual id will be set by the server
-              id: crypto.randomUUID(),
-              noteId: noteId,
-              altText: file.name,
-              imageSrc: URL.createObjectURL(file),
-              contentType: file.type,
-            }));
-            setPlaceholderImages((prevImages) => [...prevImages, ...images]);
-
-            return files;
-          }}
-          onClientUploadComplete={() => {
-            setPlaceholderImages((prevImages) => {
-              prevImages.forEach((image) => {
-                URL.revokeObjectURL(image.imageSrc);
-              });
-              return [];
-            });
-            router.refresh();
-            setOpen(false);
-          }}
-        />
-      </DialogContent>
-    </Dialog>
-  );
-};

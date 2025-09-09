@@ -16,7 +16,7 @@ const Header = () => {
   const { data: session } = useSession();
 
   return (
-    <header className="flex h-16 items-center justify-between border-b p-3">
+    <header className="flex h-[calc(theme(spacing.16)+_1px)] items-center justify-between border-b p-3">
       <SidebarTrigger />
       <div className="text-xl font-bold">Blohsh Notes</div>
 
