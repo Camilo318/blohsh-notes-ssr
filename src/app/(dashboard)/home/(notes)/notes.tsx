@@ -12,6 +12,7 @@ import { useDebounce } from "~/lib/hooks/useDebounce";
 import CreateNoteWizard from "~/components/CreateNoteWizard";
 import DeleteNoteDialog from "./delete-dialog";
 import AddNoteImageDialog from "./add-image-dialog";
+import { useEdit } from "~/hooks/use-edit";
 gsap.registerPlugin(useGSAP);
 
 export default function NotesContainer({ user }: { user: Session["user"] }) {
@@ -27,44 +28,48 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
     queryFn: () => getNotesByUser(user.id, debouncedSearchQuery),
   });
 
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [noteId, setNoteId] = useState<string | null>(null);
   const [noteImageKeys, setNoteImageKeys] = useState<string[]>([]);
-  const [showAddImageDialog, setShowAddImageDialog] = useState(false);
+
+  const [activeDialog, setActiveDialog] = useState<
+    "delete" | "addImage" | null
+  >(null);
+
+  const { setIsEditing, setNoteToEdit } = useEdit();
 
   const openDeleteDialog = (noteId: string, noteImageKeys: string[]) => {
-    setShowDeleteDialog(true);
+    setActiveDialog("delete");
     setNoteId(noteId);
     setNoteImageKeys(noteImageKeys);
-  };
-  const closeDeleteDialog = () => {
-    setShowDeleteDialog(false);
-    setNoteId(null);
-    setNoteImageKeys([]);
+    setIsEditing(true);
+    setNoteToEdit(userNotes?.find((note) => note.id === noteId) ?? null);
   };
 
   const openAddImageDialog = (noteId: string) => {
-    setShowAddImageDialog(true);
+    setActiveDialog("addImage");
     setNoteId(noteId);
+    setIsEditing(true);
+    setNoteToEdit(userNotes?.find((note) => note.id === noteId) ?? null);
   };
 
-  const closeAddImageDialog = () => {
-    setShowAddImageDialog(false);
+  const closeDialog = () => {
+    setActiveDialog(null);
     setNoteId(null);
+    setNoteImageKeys([]);
   };
 
   return (
     <>
       <DeleteNoteDialog
-        show={showDeleteDialog}
+        show={activeDialog === "delete"}
         noteId={noteId ?? ""}
         noteImageKeys={noteImageKeys ?? []}
-        onClose={closeDeleteDialog}
+        onClose={closeDialog}
       />
       <AddNoteImageDialog
+        show={activeDialog === "addImage"}
         noteId={noteId ?? ""}
-        show={showAddImageDialog}
-        onClose={closeAddImageDialog}
+        onClose={closeDialog}
       />
 
       <div className="-mx-4 bg-blohsh-secondary p-4">
@@ -87,7 +92,7 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
       )}
       {isSuccess && userNotes.length > 0 && (
         <>
-          <div className="@lg/note-grid:grid-cols-2 container grid auto-rows-[max-content_1fr_max-content] grid-cols-1 gap-4 px-0 py-4">
+          <div className="@lg/note-grid:grid-cols-2 @4xl/note-grid:grid-cols-3 container grid auto-rows-[max-content_1fr_max-content] grid-cols-1 gap-4 px-0 py-4">
             {userNotes.map((note) => (
               <Note
                 key={note.id}

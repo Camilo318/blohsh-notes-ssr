@@ -9,6 +9,7 @@ import {
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { deleteNote } from "~/server/mutations";
+import { useEdit } from "~/hooks/use-edit";
 
 export default function DeleteNoteDialog({
   noteId,
@@ -21,6 +22,7 @@ export default function DeleteNoteDialog({
   show: boolean;
   onClose: () => void;
 }) {
+  const { setIsEditing, setNoteToEdit } = useEdit();
   return (
     <Dialog open={show} onOpenChange={onClose}>
       <DialogContent>
@@ -32,14 +34,17 @@ export default function DeleteNoteDialog({
         </DialogHeader>
 
         <DialogFooter>
-          <DialogClose asChild>
-            <Button
-              variant={"destructive"}
-              onClick={() => deleteNote(noteId, noteImageKeys ?? [])}
-            >
-              Yes, delete
-            </Button>
-          </DialogClose>
+          <Button
+            variant={"destructive"}
+            onClick={async () => {
+              await deleteNote(noteId, noteImageKeys ?? []);
+              setIsEditing(false);
+              setNoteToEdit(null);
+              onClose();
+            }}
+          >
+            Yes, delete
+          </Button>
 
           <DialogClose asChild>
             <Button variant={"ghost"}>Cancel</Button>

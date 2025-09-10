@@ -18,7 +18,7 @@ export const createNote = async (note: InserNote) => {
     createdById: session?.user.id,
   });
 
-  revalidatePath("/notes");
+  revalidatePath("/home");
 };
 
 export const deleteNote = async (id: string, keys: string[]) => {
@@ -32,7 +32,7 @@ export const deleteNote = async (id: string, keys: string[]) => {
     .delete(notes)
     .where(and(eq(notes.id, id), eq(notes.createdById, session.user.id)));
 
-  revalidatePath("/notes");
+  revalidatePath("/home");
 };
 
 export const deleteImage = async (id: string, key: string) => {
@@ -43,7 +43,7 @@ export const deleteImage = async (id: string, key: string) => {
   await db.delete(images).where(eq(images.id, id));
   await deleteImagesFromUploadthing([key]);
 
-  revalidatePath("/notes");
+  revalidatePath("/home");
 };
 
 export const deleteImagesFromUploadthing = async (keys: string[]) => {
@@ -54,22 +54,27 @@ export const deleteImagesFromUploadthing = async (keys: string[]) => {
   await utapi.deleteFiles(keys);
 };
 
-export const editTodo = async (note: FormData) => {
+export const editTodo = async ({
+  title,
+  content,
+  id,
+}: {
+  title: string;
+  content: string;
+  id: string;
+}) => {
   const session = await getServerAuthSession();
 
   if (!session?.user.id) throw new Error("Unauthorized");
-
-  const title = note.get("title");
-  const content = note.get("content");
-  const id = note.get("id") as string;
-
-  await db
+  const [updatedNote] = await db
     .update(notes)
     .set({
-      title: title as string,
-      content: content as string,
+      title: title,
+      content: content,
     })
-    .where(and(eq(notes.id, id), eq(notes.createdById, session.user.id)));
+    .where(and(eq(notes.id, id), eq(notes.createdById, session.user.id)))
+    .returning();
 
-  revalidatePath("/notes");
+  revalidatePath("/home");
+  return updatedNote;
 };

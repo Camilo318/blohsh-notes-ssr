@@ -1,5 +1,4 @@
 import { forwardRef } from "react";
-import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import {
   ArchiveIcon,
@@ -20,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { useEdit } from "~/hooks/use-edit";
 
 const Note = forwardRef<
   HTMLDivElement,
@@ -32,33 +32,19 @@ const Note = forwardRef<
 >(({ note, className, openDeleteDialog, openAddImageDialog }, ref) => {
   const { title, content } = note;
 
-  const noteImages = [...(note.images ?? [])];
   const noteImageKeys = note.images?.map((image) => image.key ?? "") ?? [];
+  const { setIsEditing, setNoteToEdit } = useEdit();
 
   return (
     <Card
       ref={ref}
       className={cn(
-        "group relative overflow-hidden transition-transform ease-in-out hover:scale-105",
+        "group relative overflow-hidden transition-transform ease-in-out hover:scale-[102%]",
         className,
       )}
     >
       <CardHeader className="p-0">
-        {/* {noteImages.length > 0 && (
-          <div className="flex h-40 min-h-0 gap-1">
-            {noteImages.map((image) => (
-              <Image
-                key={image.id}
-                className="min-w-0 flex-1 object-cover object-center duration-300 ease-in-out animate-in fade-in zoom-in-125"
-                src={image.imageSrc ?? ""}
-                alt={image.altText ?? ""}
-                width={300}
-                height={300}
-              />
-            ))}
-          </div>
-        )} */}
-        <CardTitle className="mb-1 px-6 pt-6">{title}</CardTitle>
+        <CardTitle className="mb-1 line-clamp-2 px-6 pt-6">{title}</CardTitle>
         <CardDescription className="inline-block min-w-9 rounded-md px-6 py-1 text-xs font-semibold opacity-90">
           {formatDistanceToNow(new Date(note.createdAt), {
             addSuffix: true,
@@ -67,7 +53,7 @@ const Note = forwardRef<
       </CardHeader>
 
       <CardContent className="pb-0">
-        <p className="line-clamp-6 hyphens-auto whitespace-pre-line text-pretty break-words">
+        <p className="@2xl/note-grid:line-clamp-6 line-clamp-3 hyphens-auto whitespace-pre-line text-pretty break-words">
           {content}
         </p>
       </CardContent>
@@ -98,7 +84,14 @@ const Note = forwardRef<
             <ImagePlus className="h-[18px] w-[18px]" />
           </Button>
 
-          <Button variant={"ghost"} size={"icon"}>
+          <Button
+            variant={"ghost"}
+            size={"icon"}
+            onClick={() => {
+              setIsEditing(true);
+              setNoteToEdit(note);
+            }}
+          >
             <EditIcon className="h-[18px] w-[18px]" />
           </Button>
         </>
