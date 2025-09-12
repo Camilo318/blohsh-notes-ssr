@@ -21,7 +21,11 @@ const LandingHeader = () => {
       {session ? (
         <div className="flex items-center gap-2">
           <ModeToggle />
-          <Button variant="outline" onClick={() => router.push("/home")}>
+          <Button
+            variant="outline"
+            className="h-8"
+            onClick={() => router.push("/home")}
+          >
             My notes
           </Button>
         </div>
@@ -29,6 +33,7 @@ const LandingHeader = () => {
         <div className="flex items-center gap-2">
           <ModeToggle />
           <Button
+            className="h-8"
             onClick={() => signIn(undefined, { callbackUrl: "/home" })}
             variant="outline"
           >
