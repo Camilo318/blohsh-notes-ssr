@@ -41,21 +41,24 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
     setActiveDialog("delete");
     setNoteId(noteId);
     setNoteImageKeys(noteImageKeys);
-    setIsEditing(true);
-    setNoteToEdit(userNotes?.find((note) => note.id === noteId) ?? null);
+    showEditSidebar(noteId);
   };
 
   const openAddImageDialog = (noteId: string) => {
     setActiveDialog("addImage");
     setNoteId(noteId);
-    setIsEditing(true);
-    setNoteToEdit(userNotes?.find((note) => note.id === noteId) ?? null);
+    showEditSidebar(noteId);
   };
 
   const closeDialog = () => {
     setActiveDialog(null);
     setNoteId(null);
     setNoteImageKeys([]);
+  };
+
+  const showEditSidebar = (noteId: string) => {
+    setIsEditing(true);
+    setNoteToEdit(noteId);
   };
 
   return (

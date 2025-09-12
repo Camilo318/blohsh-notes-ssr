@@ -43,8 +43,10 @@ const Note = forwardRef<
         className,
       )}
     >
-      <CardHeader className="p-0">
-        <CardTitle className="mb-1 line-clamp-2 px-6 pt-6">{title}</CardTitle>
+      <CardHeader className="justify-between p-0">
+        <CardTitle className="mb-1 line-clamp-2 px-6 pt-6 leading-normal">
+          {title}
+        </CardTitle>
         <CardDescription className="inline-block min-w-9 rounded-md px-6 py-1 text-xs font-semibold opacity-90">
           {formatDistanceToNow(new Date(note.createdAt), {
             addSuffix: true,
@@ -89,7 +91,7 @@ const Note = forwardRef<
             size={"icon"}
             onClick={() => {
               setIsEditing(true);
-              setNoteToEdit(note);
+              setNoteToEdit(note.id);
             }}
           >
             <EditIcon className="h-[18px] w-[18px]" />

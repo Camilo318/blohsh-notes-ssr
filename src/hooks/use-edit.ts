@@ -1,16 +1,15 @@
 import { create } from "zustand";
-import { type SelectNote } from "~/server/db/schema";
 
 const useEditStore = create<{
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
-  noteToEdit: SelectNote | null;
-  setNoteToEdit: (noteToEdit: SelectNote | null) => void;
+  noteToEditId: string | number | null;
+  setNoteToEdit: (noteToEditId: string | number | null) => void;
 }>((set) => ({
   isEditing: false,
   setIsEditing: (isEditing) => set({ isEditing }),
-  noteToEdit: null,
-  setNoteToEdit: (noteToEdit) => set({ noteToEdit }),
+  noteToEditId: null,
+  setNoteToEdit: (id) => set({ noteToEditId: id }),
 }));
 
 export const useEdit = () => {

@@ -35,30 +35,31 @@ import { cn } from "~/lib/utils";
 import { type SelectNote } from "~/server/db/schema";
 import Image from "next/image";
 import { deleteImage, editTodo } from "~/server/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface NoteSideBarProps {
   isOpen: boolean;
   onClose: () => void;
-  note?: SelectNote & {
-    notebook?: string;
-    tags?: string[];
-    importance?: "High" | "Medium" | "Low";
-    attachments?: Array<{
-      id: string;
-      name: string;
-      size: string;
-      type: string;
+  note?: SelectNote &
+    Partial<{
+      notebook?: string;
+      tags?: string[];
+      importance?: "High" | "Medium" | "Low";
+      attachments?: Array<{
+        id: string;
+        name: string;
+        size: string;
+        type: string;
+      }>;
     }>;
-  };
-  setNoteToEdit: (noteToEdit: SelectNote | null) => void;
 }
 
 export default function NoteSideBar({
   isOpen,
   onClose,
   note,
-  setNoteToEdit,
 }: NoteSideBarProps) {
+  const queryClient = useQueryClient();
   const [notebook] = useState(note?.notebook ?? "Essays");
   const [tags] = useState(note?.tags ?? ["University", "Literature"]);
   const [importance] = useState<"High" | "Medium" | "Low">(
@@ -218,12 +219,11 @@ export default function NoteSideBar({
                 <Button
                   size="sm"
                   onClick={async () => {
-                    const updatedNote = await editTodo({
+                    await editTodo({
                       title,
                       content,
                       id: note?.id ?? "",
                     });
-                    setNoteToEdit(updatedNote ?? null);
                     // onClose();
                   }}
                 >
@@ -259,13 +259,15 @@ export default function NoteSideBar({
                   key={attachment.id}
                   className="flex flex-1 basis-1/2 items-start gap-3 overflow-hidden rounded-lg bg-secondary p-2"
                 >
-                  <Image
-                    src={attachment.imageSrc ?? ""}
-                    alt={attachment.altText ?? ""}
-                    width={80}
-                    height={80}
-                    className="-my-2 -ml-2 aspect-square self-stretch object-cover"
-                  />
+                  <div className="relative -my-2 -ml-2 h-20 w-20 self-stretch overflow-hidden">
+                    <Image
+                      src={attachment.imageSrc ?? ""}
+                      alt={attachment.altText ?? ""}
+                      width={100}
+                      height={100}
+                      className="aspect-square object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
+                    />
+                  </div>
                   {/* <FileImage className="h-4 w-4 text-foreground" /> */}
 
                   <div className="min-w-0 flex-1">
@@ -285,9 +287,12 @@ export default function NoteSideBar({
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0"
-                      onClick={() =>
-                        deleteImage(attachment.id, attachment.key ?? "")
-                      }
+                      onClick={async () => {
+                        await deleteImage(attachment.id, attachment.key ?? "");
+                        await queryClient.invalidateQueries({
+                          queryKey: ["noteToEdit", note?.id],
+                        });
+                      }}
                     >
                       <Trash2Icon className="h-4 w-4" />
                     </Button>

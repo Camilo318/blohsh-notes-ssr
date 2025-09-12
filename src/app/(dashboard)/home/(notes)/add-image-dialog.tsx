@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,8 @@ const AddNoteImageDialog = ({
   show: boolean;
   onClose: () => void;
 }) => {
-  const router = useRouter();
+  const queryClient = useQueryClient();
+
   return (
     <Dialog open={show} onOpenChange={onClose}>
       <DialogContent>
@@ -28,8 +29,11 @@ const AddNoteImageDialog = ({
         <UploadDropzone
           input={{ noteId }}
           endpoint="imageUploader"
-          onClientUploadComplete={() => {
-            router.refresh();
+          onClientUploadComplete={async () => {
+            await queryClient.invalidateQueries({
+              queryKey: ["noteToEdit", noteId],
+            });
+
             onClose();
           }}
         />

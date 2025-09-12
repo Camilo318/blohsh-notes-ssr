@@ -1,6 +1,8 @@
 "use server";
 
 import { db } from "./db";
+import { notes } from "./db/schema";
+import { eq } from "drizzle-orm";
 // import { images, notes } from "./db/schema";
 // import { eq, desc, ilike, or, and } from "drizzle-orm";
 
@@ -44,4 +46,14 @@ export const getNotesByUser = async (userId: string, searchQuery = "") => {
     console.error("Error fetching notes:", error);
     throw new Error("Failed to fetch notes");
   }
+};
+
+export const getNoteById = async (id: string) => {
+  const note = await db.query.notes.findFirst({
+    with: {
+      images: true,
+    },
+    where: eq(notes.id, id),
+  });
+  return note;
 };
