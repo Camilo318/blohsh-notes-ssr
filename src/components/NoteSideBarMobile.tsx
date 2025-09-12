@@ -19,6 +19,7 @@ import {
   Smile,
   Download,
   Trash2Icon,
+  Loader2,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -31,11 +32,11 @@ import {
   DrawerTitle,
 } from "~/components/ui/drawer";
 import { Skeleton } from "~/components/ui/skeleton";
-import { cn } from "~/lib/utils";
 import { type SelectNote } from "~/server/db/schema";
 import Image from "next/image";
 import { deleteImage, editTodo } from "~/server/mutations";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface NoteSideBarMobileProps {
   isOpen: boolean;
@@ -78,6 +79,28 @@ export default function NoteSideBarMobile({
     setContent(note?.content ?? "");
   }, [note?.title, note?.content]);
 
+  const editNoteMutation = useMutation({
+    mutationFn: editTodo,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["noteToEdit", note?.id],
+      });
+      toast.success("Note saved successfully", {
+        description: "Your changes have been saved.",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to save note:", error);
+      toast.error("Failed to save note", {
+        description:
+          "There was an error saving your changes. Please try again.",
+      });
+    },
+    onSettled: () => {
+      handleOpenChanges(false);
+    },
+  });
+
   return (
     <Drawer open={isOpen} onOpenChange={handleOpenChanges}>
       <DrawerContent className="h-[85vh]">
@@ -104,14 +127,14 @@ export default function NoteSideBarMobile({
           {/* Note Title */}
           <div className="mb-6">
             <div className="flex items-center gap-2">
-              <ScrollText className="h-5 w-5" />
+              <ScrollText className="size-5" />
               {isLoading ? (
-                <Skeleton className="h-9 flex-1" />
+                <Skeleton className="h-7 flex-1" />
               ) : (
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="border-0 text-lg font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-7 border-0 text-lg font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="Note title"
                 />
               )}
@@ -152,11 +175,7 @@ export default function NoteSideBarMobile({
                       <Badge
                         key={index}
                         variant="secondary"
-                        className={cn(
-                          "text-xs",
-                          index === 0 && "bg-amber-100 text-amber-800",
-                          index === 1 && "bg-blue-100 text-blue-800",
-                        )}
+                        className="text-xs"
                       >
                         {tag}
                       </Badge>
@@ -234,17 +253,23 @@ export default function NoteSideBarMobile({
               <div className="bg-sidebar-accent flex items-center justify-between rounded-b-md p-3">
                 <Button
                   size="sm"
-                  onClick={async () => {
-                    await editTodo({
+                  onClick={() => {
+                    editNoteMutation.mutate({
                       title,
                       content,
                       id: note?.id ?? "",
                     });
-                    // onClose();
                   }}
-                  disabled={isLoading}
+                  disabled={isLoading || editNoteMutation.isPending}
                 >
-                  Save
+                  {editNoteMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save"
+                  )}
                 </Button>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <Smile className="h-4 w-4" />

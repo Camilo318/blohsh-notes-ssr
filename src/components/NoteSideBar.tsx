@@ -19,6 +19,7 @@ import {
   Smile,
   Download,
   Trash2Icon,
+  Loader2,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -35,7 +36,8 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { type SelectNote } from "~/server/db/schema";
 import Image from "next/image";
 import { deleteImage, editTodo } from "~/server/mutations";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import NoteSideBarMobile from "./NoteSideBarMobile";
 import { useIsMobile } from "~/hooks/use-mobile";
 
@@ -79,6 +81,25 @@ export default function NoteSideBar({
     setTitle(note?.title ?? "");
     setContent(note?.content ?? "");
   }, [note?.title, note?.content]);
+
+  const editNoteMutation = useMutation({
+    mutationFn: editTodo,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["noteToEdit", note?.id],
+      });
+      toast.success("Note saved successfully", {
+        description: "Your changes have been saved.",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to save note:", error);
+      toast.error("Failed to save note", {
+        description:
+          "There was an error saving your changes. Please try again.",
+      });
+    },
+  });
 
   const isMobile = useIsMobile();
 
@@ -259,17 +280,23 @@ export default function NoteSideBar({
               <div className="bg-sidebar-accent flex items-center justify-between rounded-b-md p-3">
                 <Button
                   size="sm"
-                  onClick={async () => {
-                    await editTodo({
+                  onClick={() => {
+                    editNoteMutation.mutate({
                       title,
                       content,
                       id: note?.id ?? "",
                     });
-                    // onClose();
                   }}
-                  disabled={isLoading}
+                  disabled={isLoading || editNoteMutation.isPending}
                 >
-                  Save
+                  {editNoteMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save"
+                  )}
                 </Button>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <Smile className="h-4 w-4" />
@@ -312,8 +339,8 @@ export default function NoteSideBar({
                       <Image
                         src={attachment.imageSrc ?? ""}
                         alt={attachment.altText ?? ""}
-                        width={80}
-                        height={80}
+                        width={100}
+                        height={100}
                         className="aspect-square object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
                       />
                     </div>

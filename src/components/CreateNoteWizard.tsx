@@ -5,6 +5,9 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { createNote } from "~/server/mutations";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export default function CreateNoteWizard() {
   const [collapsibleState, setCollapsibleState] = useState<"open" | "closed">(
@@ -13,6 +16,23 @@ export default function CreateNoteWizard() {
   const [note, setNote] = useState({ title: "", content: "" });
 
   const collapsibleId = useId();
+
+  const createNoteMutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      toast.success("Note created successfully", {
+        description: "Your new note has been saved.",
+      });
+      setNote({ title: "", content: "" });
+      setCollapsibleState("closed");
+    },
+    onError: (error) => {
+      console.error("Failed to create note:", error);
+      toast.error("Failed to create note", {
+        description: "There was an error creating your note. Please try again.",
+      });
+    },
+  });
 
   return (
     <div
@@ -68,22 +88,26 @@ export default function CreateNoteWizard() {
 
             <div className="flex justify-end gap-3">
               <Button
-                disabled={!note.content && !note.title}
-                onClick={async () => {
-                  await createNote({ ...note, createdById: "" });
-
-                  setNote({
-                    title: "",
-                    content: "",
-                  });
-                  setCollapsibleState("closed");
+                disabled={
+                  (!note.content && !note.title) || createNoteMutation.isPending
+                }
+                onClick={() => {
+                  createNoteMutation.mutate({ ...note, createdById: "" });
                 }}
               >
-                Create
+                {createNoteMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create"
+                )}
               </Button>
               <Button
                 variant={"ghost"}
                 onClick={() => setCollapsibleState("closed")}
+                disabled={createNoteMutation.isPending}
               >
                 Close
               </Button>
