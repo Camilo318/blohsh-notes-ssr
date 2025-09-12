@@ -41,7 +41,7 @@ import { useIsMobile } from "~/hooks/use-mobile";
 
 interface NoteSideBarProps {
   isOpen: boolean;
-  onClose: () => void;
+  handleOpenChanges: (open: boolean) => void;
   note?: SelectNote &
     Partial<{
       notebook?: string;
@@ -59,7 +59,7 @@ interface NoteSideBarProps {
 
 export default function NoteSideBar({
   isOpen,
-  onClose,
+  handleOpenChanges,
   note,
   isLoading = false,
 }: NoteSideBarProps) {
@@ -86,7 +86,7 @@ export default function NoteSideBar({
     return (
       <NoteSideBarMobile
         isOpen={isOpen}
-        onClose={onClose}
+        handleOpenChanges={handleOpenChanges}
         note={note}
         isLoading={isLoading}
       />
@@ -116,7 +116,7 @@ export default function NoteSideBar({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={onClose}
+              onClick={() => handleOpenChanges(false)}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -312,8 +312,8 @@ export default function NoteSideBar({
                       <Image
                         src={attachment.imageSrc ?? ""}
                         alt={attachment.altText ?? ""}
-                        width={100}
-                        height={100}
+                        width={80}
+                        height={80}
                         className="aspect-square object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
                       />
                     </div>

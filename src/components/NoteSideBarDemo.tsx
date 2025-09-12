@@ -14,15 +14,17 @@ export default function NoteSideBarDemo() {
     enabled: !!noteToEditId,
   });
 
-  const handleClose = () => {
-    setIsEditing(false);
-    setNoteToEdit(null);
+  const handleOpenChanges = (open: boolean) => {
+    if (!open) {
+      setNoteToEdit(null);
+    }
+    setIsEditing(open);
   };
 
   return (
     <NoteSideBar
       isOpen={isEditing}
-      onClose={handleClose}
+      handleOpenChanges={handleOpenChanges}
       note={note}
       isLoading={isLoading}
     />

@@ -7,6 +7,7 @@ import {
   DialogDescription,
 } from "~/components/ui/dialog";
 import { UploadDropzone } from "~/components/uploadthing";
+import { useEdit } from "~/hooks/use-edit";
 
 const AddNoteImageDialog = ({
   noteId,
@@ -18,6 +19,7 @@ const AddNoteImageDialog = ({
   onClose: () => void;
 }) => {
   const queryClient = useQueryClient();
+  const { setIsEditing, setNoteToEdit } = useEdit();
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
@@ -33,6 +35,9 @@ const AddNoteImageDialog = ({
             await queryClient.invalidateQueries({
               queryKey: ["noteToEdit", noteId],
             });
+
+            setIsEditing(true);
+            setNoteToEdit(noteId);
 
             onClose();
           }}

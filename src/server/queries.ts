@@ -51,8 +51,11 @@ export const getNotesByUser = async (userId: string, searchQuery = "") => {
 export const getNoteById = async (id: string) => {
   const note = await db.query.notes.findFirst({
     with: {
-      images: true,
+      images: {
+        orderBy: (fields, { desc }) => desc(fields.createdAt),
+      },
     },
+
     where: eq(notes.id, id),
   });
   return note;

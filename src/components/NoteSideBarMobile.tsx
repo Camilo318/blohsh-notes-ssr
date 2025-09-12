@@ -39,7 +39,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface NoteSideBarMobileProps {
   isOpen: boolean;
-  onClose: () => void;
+  handleOpenChanges: (open: boolean) => void;
   note?: SelectNote &
     Partial<{
       notebook?: string;
@@ -57,7 +57,7 @@ interface NoteSideBarMobileProps {
 
 export default function NoteSideBarMobile({
   isOpen,
-  onClose,
+  handleOpenChanges,
   note,
   isLoading = false,
 }: NoteSideBarMobileProps) {
@@ -79,7 +79,7 @@ export default function NoteSideBarMobile({
   }, [note?.title, note?.content]);
 
   return (
-    <Drawer open={isOpen}>
+    <Drawer open={isOpen} onOpenChange={handleOpenChanges}>
       <DrawerContent className="h-[85vh]">
         <DrawerHeader className="pb-2">
           <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ export default function NoteSideBarMobile({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={onClose}
+                onClick={() => handleOpenChanges(false)}
               >
                 <X className="h-4 w-4" />
               </Button>

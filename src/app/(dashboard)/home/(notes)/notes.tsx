@@ -12,7 +12,6 @@ import { useDebounce } from "~/lib/hooks/useDebounce";
 import CreateNoteWizard from "~/components/CreateNoteWizard";
 import DeleteNoteDialog from "./delete-dialog";
 import AddNoteImageDialog from "./add-image-dialog";
-import { useEdit } from "~/hooks/use-edit";
 gsap.registerPlugin(useGSAP);
 
 export default function NotesContainer({ user }: { user: Session["user"] }) {
@@ -35,30 +34,21 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
     "delete" | "addImage" | null
   >(null);
 
-  const { setIsEditing, setNoteToEdit } = useEdit();
-
   const openDeleteDialog = (noteId: string, noteImageKeys: string[]) => {
     setActiveDialog("delete");
     setNoteId(noteId);
     setNoteImageKeys(noteImageKeys);
-    showEditSidebar(noteId);
   };
 
   const openAddImageDialog = (noteId: string) => {
     setActiveDialog("addImage");
     setNoteId(noteId);
-    showEditSidebar(noteId);
   };
 
   const closeDialog = () => {
     setActiveDialog(null);
     setNoteId(null);
     setNoteImageKeys([]);
-  };
-
-  const showEditSidebar = (noteId: string) => {
-    setIsEditing(true);
-    setNoteToEdit(noteId);
   };
 
   return (
