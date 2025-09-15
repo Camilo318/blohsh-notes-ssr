@@ -76,6 +76,7 @@ export default function NoteSideBar({
 
   const [title, setTitle] = useState(note?.title ?? "Northanger Abbey essay");
   const [content, setContent] = useState(note?.content ?? "");
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
 
   useEffect(() => {
     setTitle(note?.title ?? "");
@@ -98,6 +99,31 @@ export default function NoteSideBar({
         description:
           "There was an error saving your changes. Please try again.",
       });
+    },
+  });
+
+  const deleteImageMutation = useMutation({
+    mutationFn: ({ id, key }: { id: string; key: string }) =>
+      deleteImage(id, key),
+    onMutate: ({ id }) => {
+      setDeletingImageId(id);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["noteToEdit", note?.id],
+      });
+      toast.success("Image deleted successfully", {
+        description: "The image has been removed from your note.",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to delete image:", error);
+      toast.error("Failed to delete image", {
+        description: "There was an error deleting the image. Please try again.",
+      });
+    },
+    onSettled: () => {
+      setDeletingImageId(null);
     },
   });
 
@@ -333,48 +359,58 @@ export default function NoteSideBar({
                 {attachments.map((attachment) => (
                   <div
                     key={attachment.id}
-                    className="flex flex-1 basis-1/2 items-start gap-3 overflow-hidden rounded-lg bg-secondary p-2"
+                    className="flex flex-1 basis-1/2 items-stretch gap-3 overflow-hidden rounded-lg bg-secondary"
                   >
-                    <div className="relative -my-2 -ml-2 h-20 w-20 self-stretch overflow-hidden">
-                      <Image
-                        src={attachment.imageSrc ?? ""}
-                        alt={attachment.altText ?? ""}
-                        width={100}
-                        height={100}
-                        className="aspect-square object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
-                      />
-                    </div>
+                    {deletingImageId === attachment.id ? (
+                      <Skeleton className="h-20 w-full" />
+                    ) : (
+                      <>
+                        <div className="relative h-20 w-20 overflow-hidden">
+                          <Image
+                            src={attachment.imageSrc ?? ""}
+                            alt={attachment.altText ?? ""}
+                            width={100}
+                            height={100}
+                            className="aspect-square object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
+                          />
+                        </div>
 
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {attachment.altText}
-                      </p>
-                      <p className="text-foreground-accent text-xs">
-                        {attachment.contentType}
-                      </p>
-                    </div>
+                        <div className="flex flex-1 gap-3 p-2 pl-0">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-foreground">
+                              {attachment.altText}
+                            </p>
+                            <p className="text-foreground-accent text-xs">
+                              {attachment.contentType}
+                            </p>
+                          </div>
 
-                    <div className="flex flex-col-reverse justify-between gap-2 self-stretch">
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={async () => {
-                          await deleteImage(
-                            attachment.id,
-                            attachment.key ?? "",
-                          );
-                          await queryClient.invalidateQueries({
-                            queryKey: ["noteToEdit", note?.id],
-                          });
-                        }}
-                      >
-                        <Trash2Icon className="h-4 w-4" />
-                      </Button>
-                    </div>
+                          <div className="flex flex-col-reverse justify-between gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => {
+                                deleteImageMutation.mutate({
+                                  id: attachment.id,
+                                  key: attachment.key ?? "",
+                                });
+                              }}
+                              disabled={deleteImageMutation.isPending}
+                            >
+                              <Trash2Icon className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>

@@ -63,30 +63,37 @@ const Note = forwardRef<
       <CardFooter className="flex items-center justify-around gap-2 pb-3 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
         <>
           <Button
+            title="Delete"
             variant={"ghost"}
             size={"icon"}
             onClick={() => openDeleteDialog(note.id, noteImageKeys)}
           >
             <Trash2Icon className="h-[18px] w-[18px]" />
+            <span className="sr-only">Delete</span>
           </Button>
 
-          <Button variant={"ghost"} size={"icon"}>
+          <Button title="Archive" variant={"ghost"} size={"icon"}>
             <ArchiveIcon className="h-[18px] w-[18px]" />
+            <span className="sr-only">Archive</span>
           </Button>
 
-          <Button variant={"ghost"} size={"icon"}>
+          <Button title="Change Color" variant={"ghost"} size={"icon"}>
             <PaletteIcon className="h-[18px] w-[18px]" />
+            <span className="sr-only">Change Color</span>
           </Button>
 
           <Button
+            title="Add Image"
             variant={"ghost"}
             size={"icon"}
             onClick={() => openAddImageDialog(note.id)}
           >
             <ImagePlus className="h-[18px] w-[18px]" />
+            <span className="sr-only">Add Image</span>
           </Button>
 
           <Button
+            title="Edit"
             variant={"ghost"}
             size={"icon"}
             onClick={() => {
@@ -95,6 +102,7 @@ const Note = forwardRef<
             }}
           >
             <EditIcon className="h-[18px] w-[18px]" />
+            <span className="sr-only">Edit</span>
           </Button>
         </>
       </CardFooter>
