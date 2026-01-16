@@ -39,7 +39,7 @@ import { deleteImage, editTodo } from "~/server/mutations";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import NoteSideBarMobile from "./NoteSideBarMobile";
-import { useIsMobile } from "~/hooks/use-mobile";
+import { useMediaQuery } from "~/hooks/use-media-query";
 
 interface NoteSideBarProps {
   isOpen: boolean;
@@ -127,7 +127,7 @@ export default function NoteSideBar({
     },
   });
 
-  const isMobile = useIsMobile();
+  const isMobile = useMediaQuery("(max-width: 1023px)");
 
   if (isMobile) {
     return (
@@ -183,7 +183,7 @@ export default function NoteSideBar({
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="bg-sidebar-accent h-7 border-0 text-lg font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-7 border-0 bg-sidebar-accent text-lg font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="Note title"
                 />
               )}
@@ -197,7 +197,7 @@ export default function NoteSideBar({
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
-                <span className="text-sidebar-foreground text-sm">
+                <span className="text-sm text-sidebar-foreground">
                   Notebook:
                 </span>
                 {isLoading ? (
@@ -214,7 +214,7 @@ export default function NoteSideBar({
 
               <div className="flex items-center gap-2 overflow-hidden">
                 <Tag className="h-4 w-4" />
-                <span className="text-sidebar-foreground text-sm">Tags:</span>
+                <span className="text-sm text-sidebar-foreground">Tags:</span>
                 {isLoading ? (
                   <div className="flex gap-1">
                     <Skeleton className="h-6 w-16" />
@@ -237,7 +237,7 @@ export default function NoteSideBar({
 
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
-                <span className="text-sidebar-foreground text-sm">
+                <span className="text-sm text-sidebar-foreground">
                   Importance:
                 </span>
                 {isLoading ? (
@@ -291,19 +291,19 @@ export default function NoteSideBar({
             {/* Text Area */}
             <div className="flex-1">
               {isLoading ? (
-                <div className="bg-sidebar-accent min-h-72 rounded-md p-3">
+                <div className="min-h-72 rounded-md bg-sidebar-accent p-3">
                   <Skeleton className="h-full w-full" />
                 </div>
               ) : (
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="bg-sidebar-accent min-h-72 resize-none rounded-b-none border-0 text-sm leading-relaxed focus-visible:ring-0"
+                  className="min-h-72 resize-none rounded-b-none border-0 bg-sidebar-accent text-sm leading-relaxed focus-visible:ring-0"
                   placeholder="Start writing your note..."
                 />
               )}
               {/* Actions */}
-              <div className="bg-sidebar-accent flex items-center justify-between rounded-b-md p-3">
+              <div className="flex items-center justify-between rounded-b-md bg-sidebar-accent p-3">
                 <Button
                   size="sm"
                   onClick={() => {

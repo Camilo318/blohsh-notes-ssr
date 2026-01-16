@@ -33,13 +33,14 @@ const Note = forwardRef<
   const { title, content } = note;
 
   const noteImageKeys = note.images?.map((image) => image.key ?? "") ?? [];
-  const { setIsEditing, setNoteToEdit } = useEdit();
+  const { setIsEditing, setNoteToEdit, noteToEditId } = useEdit();
 
   return (
     <Card
       ref={ref}
       className={cn(
         "group relative overflow-hidden transition-transform ease-in-out hover:scale-[102%]",
+        noteToEditId === note.id && "outline outline-2 outline-primary",
         className,
       )}
     >
@@ -55,7 +56,7 @@ const Note = forwardRef<
       </CardHeader>
 
       <CardContent className="pb-0">
-        <p className="@2xl/note-grid:line-clamp-6 line-clamp-3 hyphens-auto whitespace-pre-line text-pretty break-words">
+        <p className="line-clamp-3 hyphens-auto whitespace-pre-line text-pretty break-words @2xl/note-grid:line-clamp-6">
           {content}
         </p>
       </CardContent>
