@@ -55,6 +55,20 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Note card color variants - using Tailwind color palette */
+    --note-rose: 356 100% 95%;
+    --note-rose-text: 347 83% 41%;
+    --note-mint: 152 81% 90%;
+    --note-mint-text: 162 93% 24%;
+    --note-cream: 48 96% 89%;
+    --note-cream-text: 32 91% 37%;
+    --note-sky: 204 94% 94%;
+    --note-sky-text: 201 96% 32%;
+    --note-lavender: 251 91% 95%;
+    --note-lavender-text: 263 70% 50%;
+
+    --note-content-bg: 0 0% 100%;
   }
 
   .dark {
@@ -99,6 +113,20 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Note card color variants - dark mode - using Tailwind color palette */
+    --note-rose: 339 77% 30%;
+    --note-rose-text: 353 96% 82%;
+    --note-mint: 164 86% 16%;
+    --note-mint-text: 156 72% 67%;
+    --note-cream: 26 78% 27%;
+    --note-cream-text: 46 97% 65%;
+    --note-sky: 202 80% 24%;
+    --note-sky-text: 201 94% 74%;
+    --note-lavender: 263 70% 35%;
+    --note-lavender-text: 252 95% 85%;
+
+    --note-content-bg: 224 71% 10%;
   }
 }
 
@@ -115,5 +143,31 @@
   .feature,
   .secret {
     @apply mx-auto my-40 text-3xl font-medium tracking-widest md:text-[2.5rem];
+  }
+
+  .glassmorphism {
+    /* Glassmorphism effects */
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+    border: 1px solid rgba(255, 255, 255, 0.4); /* Subtle, lighter border */
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.4); /* Outer and inner shadows */
+    backdrop-filter: blur(10px); /* The key blur effect */
+    -webkit-backdrop-filter: blur(10px); /* For Safari support */
+
+    /* Optional: Smooth transition on hover/active */
+    transition: all 0.3s ease;
+  }
+
+  .glassmorphism:hover {
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+  }
+
+  .glassmorphism:active {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.3);
   }
 }
