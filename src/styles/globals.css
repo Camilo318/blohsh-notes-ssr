@@ -156,7 +156,7 @@
     -webkit-backdrop-filter: blur(10px); /* For Safari support */
 
     /* Optional: Smooth transition on hover/active */
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease;
   }
 
   .glassmorphism:hover {

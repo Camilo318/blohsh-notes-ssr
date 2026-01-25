@@ -54,8 +54,7 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
   };
 
   useGSAP(
-    (context) => {
-      console.log(context.data);
+    () => {
       if (!isSuccess || userNotes.length < 1) return;
       const notes = gsap.utils.toArray<Element>(".note-card");
 
