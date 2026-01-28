@@ -116,7 +116,7 @@ const Note = ({
     <Card
       className={cn(
         className,
-        "group relative overflow-hidden rounded-2xl shadow-sm",
+        "liquid-glass group relative overflow-hidden rounded-2xl",
         colorVariant.bg,
         noteToEditId === note.id && "ring-2 ring-primary",
         colorVariant.headerText,
@@ -134,7 +134,10 @@ const Note = ({
           <Button
             variant="ghost"
             size="icon"
-            className={cn(colorVariant.headerText)}
+            className={cn(
+              colorVariant.headerText,
+              "hover:bg-white/20 dark:hover:bg-white/10",
+            )}
             onClick={() => openAddImageDialog(note.id)}
           >
             <Plus className="h-4 w-4" />
@@ -146,7 +149,10 @@ const Note = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn(colorVariant.headerText)}
+                className={cn(
+                  colorVariant.headerText,
+                  "hover:bg-white/20 dark:hover:bg-white/10",
+                )}
               >
                 <MoreHorizontal className="h-4 w-4" />
                 <span className="sr-only">Options</span>
@@ -192,21 +198,25 @@ const Note = ({
       </CardHeader>
       {/* Outer Content Card */}
       <div
-        className="cursor-pointer p-4 transition-transform ease-out hover:scale-[1.02]"
+        className="cursor-pointer p-4 transition-all duration-300 ease-out hover:scale-[1.02]"
         onClick={() => {
           setIsEditing(true);
           setNoteToEdit(note.id);
         }}
       >
         {/* Inner Content Card */}
-        <CardContent className="bg-note-content-bg flex h-full flex-col gap-4 rounded-2xl py-6">
+        <CardContent className="flex h-full flex-col gap-4 rounded-2xl bg-note-content-bg/80 py-6 backdrop-blur-sm">
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
             {tags.map((tag, index) => (
               <Badge
                 key={index}
                 variant="secondary"
-                className="px-2.5 py-1 text-xs font-medium"
+                className={cn(
+                  "px-2.5 py-1 text-xs font-medium",
+                  colorVariant.border,
+                  "border bg-white/50 dark:bg-white/10",
+                )}
               >
                 {tag.label} {tag.emoji}
               </Badge>

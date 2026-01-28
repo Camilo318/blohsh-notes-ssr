@@ -34,9 +34,9 @@ const buttonVariants = cva(
       {
         variant: "ghost",
         size: "icon",
-        // glassmorphism effect
+        // liquid glass effect
         className:
-          "rounded-[50%] hover:text-current hover:bg-transparent glassmorphism",
+          "rounded-[50%] hover:text-current hover:bg-transparent liquid-glass",
       },
     ],
   },

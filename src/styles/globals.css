@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --background: 220 33% 98%;
+    --background: 220 14% 93%;
     --foreground: 224 71% 4%;
 
-    --card: 0 0% 100%;
+    --card: 220 14% 97%;
     --card-foreground: 224 71% 4%;
 
     --blohsh: 231 48% 65%;
@@ -16,31 +16,31 @@
     --blohsh-border: 226 43% 35%;
     --blohsh-hover: 226 43% 49% / 12%;
 
-    --popover: 0 0% 100%;
+    --popover: 220 14% 97%;
     --popover-foreground: 224 71% 4%;
 
     --primary: 226 70% 55%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 220 14% 90%;
+    --secondary: 220 14% 86%;
     --secondary-foreground: 224 71% 4%;
 
-    --muted: 220 14% 90%;
+    --muted: 220 14% 86%;
     --muted-foreground: 220 8% 46%;
 
-    --accent: 220 14% 90%;
+    --accent: 220 14% 86%;
     --accent-foreground: 224 71% 4%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --border: 220 13% 86%;
+    --input: 220 13% 86%;
     --ring: 226 70% 55%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 220 14% 95%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
 
@@ -48,11 +48,11 @@
 
     --sidebar-primary-foreground: 0 0% 98%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 220 14% 90%;
 
     --sidebar-accent-foreground: 240 5.9% 10%;
 
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 220 13% 86%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
 
@@ -69,6 +69,14 @@
     --note-lavender-text: 263 70% 50%;
 
     --note-content-bg: 0 0% 100%;
+
+    /* Liquid glass effect custom properties */
+    --liquid-glass-bg: 255 255 255 / 0.4;
+    --liquid-glass-border: 255 255 255 / 0.4;
+    --liquid-glass-shadow-outer: 0 0 0 / 0.05;
+    --liquid-glass-shadow-inner: 0 0 0 / 0.02;
+    --liquid-glass-highlight: 255 255 255 / 0.5;
+    --liquid-glass-lowlight: 0 0 0 / 0.02;
   }
 
   .dark {
@@ -127,6 +135,14 @@
     --note-lavender-text: 252 95% 85%;
 
     --note-content-bg: 224 71% 10%;
+
+    /* Liquid glass effect custom properties - dark mode */
+    --liquid-glass-bg: 30 35 50 / 0.7;
+    --liquid-glass-border: 255 255 255 / 0.1;
+    --liquid-glass-shadow-outer: 0 0 0 / 0.3;
+    --liquid-glass-shadow-inner: 0 0 0 / 0.2;
+    --liquid-glass-highlight: 255 255 255 / 0.1;
+    --liquid-glass-lowlight: 0 0 0 / 0.1;
   }
 }
 
@@ -145,29 +161,49 @@
     @apply mx-auto my-40 text-3xl font-medium tracking-widest md:text-[2.5rem];
   }
 
-  .glassmorphism {
-    /* Glassmorphism effects */
-    background: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
-    border: 1px solid rgba(255, 255, 255, 0.4); /* Subtle, lighter border */
-    box-shadow:
-      0 4px 6px rgba(0, 0, 0, 0.1),
-      inset 0 1px 1px rgba(255, 255, 255, 0.4); /* Outer and inner shadows */
-    backdrop-filter: blur(10px); /* The key blur effect */
-    -webkit-backdrop-filter: blur(10px); /* For Safari support */
-
-    /* Optional: Smooth transition on hover/active */
-    transition: background-color 0.3s ease;
+  /* Animated gradient for text */
+  .animate-gradient {
+    animation: gradient-shift 3s ease-in-out infinite;
   }
 
-  .glassmorphism:hover {
-    background: rgba(255, 255, 255, 0.3);
-    cursor: pointer;
+  @keyframes gradient-shift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
   }
 
-  .glassmorphism:active {
-    background: rgba(255, 255, 255, 0.1);
+  /* Slow pulse animation for background blobs */
+  .animate-pulse-slow {
+    animation: pulse-slow 8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.1);
+    }
+  }
+
+  /* Liquid glass effect - modern frosted glass */
+  .liquid-glass {
+    background: rgb(var(--liquid-glass-bg));
+    border: 1px solid rgb(var(--liquid-glass-border));
     box-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.1),
-      inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      0 8px 32px rgb(var(--liquid-glass-shadow-outer)),
+      0 2px 8px rgb(var(--liquid-glass-shadow-inner)),
+      inset 0 2px 4px rgb(var(--liquid-glass-highlight)),
+      inset 0 -1px 2px rgb(var(--liquid-glass-lowlight));
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    transition: box-shadow 0.3s ease, background 0.3s ease;
   }
 }

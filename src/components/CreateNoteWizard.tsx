@@ -120,7 +120,7 @@ export default function CreateNoteWizard() {
   return (
     <div
       ref={collapsibleRef}
-      className="glassmorphism mx-auto min-h-11 w-full max-w-[600px] rounded-lg"
+      className="liquid-glass mx-auto min-h-11 w-full max-w-[600px] rounded-lg"
       aria-expanded={collapsibleState === "open"}
       data-state={collapsibleState}
     >

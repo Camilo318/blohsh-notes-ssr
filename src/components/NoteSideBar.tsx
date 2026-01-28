@@ -143,7 +143,7 @@ export default function NoteSideBar({
   return (
     <Sidebar
       collapsible="none"
-      className="sticky top-0 hidden h-svh border-l transition-[width] duration-200 ease-out data-[open=false]:w-0 lg:flex"
+      className="sticky top-0 hidden h-svh overflow-hidden border-l transition-[width] duration-200 ease-out data-[open=false]:w-0 lg:flex"
       style={
         {
           "--sidebar-width": "24rem",
