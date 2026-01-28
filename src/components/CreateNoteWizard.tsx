@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useId } from "react";
+import { useState, useId, useRef } from "react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { createNote } from "~/server/mutations";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+gsap.registerPlugin(useGSAP);
 
 export default function CreateNoteWizard() {
   const [collapsibleState, setCollapsibleState] = useState<"open" | "closed">(
@@ -16,15 +19,95 @@ export default function CreateNoteWizard() {
   const [note, setNote] = useState({ title: "", content: "" });
 
   const collapsibleId = useId();
+  const queryClient = useQueryClient();
+
+  const collapsibleRef = useRef<HTMLDivElement>(null);
+
+  const { contextSafe } = useGSAP(
+    () => {
+      if (collapsibleState === "closed") return;
+
+      //open animation
+      const tl = gsap.timeline();
+
+      tl.to(".call-to-action", {
+        autoAlpha: 0,
+        duration: 0.2,
+        ease: "circ.out",
+        y: 50,
+      })
+        .to(
+          collapsibleRef.current,
+          {
+            height: "218px",
+            duration: 0.5,
+            ease: "circ.out",
+          },
+          "<",
+        )
+        .fromTo(
+          ".note-fields",
+          { autoAlpha: 0 },
+          {
+            autoAlpha: 1,
+            duration: 0.5,
+            ease: "circ.out",
+            onComplete: () => {
+              setCollapsibleState("open");
+            },
+          },
+          "-=0.3",
+        );
+    },
+    { scope: collapsibleRef, dependencies: [collapsibleState] },
+  );
+
+  const collapseAnimation = contextSafe(() => {
+    const tl = gsap.timeline();
+
+    tl.to(".note-fields", {
+      autoAlpha: 0,
+      duration: 0.2,
+    })
+      .to(
+        collapsibleRef.current,
+        {
+          height: "50px",
+          duration: 0.5,
+          ease: "circ.out",
+        },
+        "<",
+      )
+      .to(
+        ".call-to-action",
+        {
+          autoAlpha: 1,
+          duration: 0.2,
+          ease: "circ.out",
+          y: 0,
+          onComplete: () => {
+            setCollapsibleState("closed");
+          },
+        },
+        "-=0.3",
+      );
+  });
 
   const createNoteMutation = useMutation({
     mutationFn: createNote,
     onSuccess: () => {
+      setNote({ title: "", content: "" });
+      collapseAnimation();
       toast.success("Note created successfully", {
         description: "Your new note has been saved.",
+        position: "top-right",
       });
-      setNote({ title: "", content: "" });
-      setCollapsibleState("closed");
+
+      setTimeout(() => {
+        void queryClient.invalidateQueries({
+          queryKey: ["notes"],
+        });
+      }, 1000);
     },
     onError: (error) => {
       console.error("Failed to create note:", error);
@@ -36,13 +119,14 @@ export default function CreateNoteWizard() {
 
   return (
     <div
-      className="mx-auto min-h-11 w-full max-w-[600px] rounded-lg border border-blohsh-border bg-card shadow-3xl"
+      ref={collapsibleRef}
+      className="liquid-glass mx-auto min-h-11 w-full max-w-[600px] rounded-lg"
       aria-expanded={collapsibleState === "open"}
       data-state={collapsibleState}
     >
       <div
         data-state={collapsibleState}
-        className="cursor-text px-4 py-3 data-[state=open]:hidden"
+        className="call-to-action cursor-text px-4 py-3 data-[state=open]:hidden"
         aria-controls={collapsibleId}
         onClick={() => setCollapsibleState("open")}
       >
@@ -51,69 +135,63 @@ export default function CreateNoteWizard() {
 
       <div
         data-state={collapsibleState}
-        className="flex flex-col gap-3 px-4 py-4 data-[state=closed]:hidden"
+        className="note-fields flex flex-col gap-3 px-4 py-4 data-[state=closed]:hidden"
         id={collapsibleId}
-        hidden={collapsibleState === "closed"}
       >
-        {collapsibleState === "open" && (
-          <>
-            <Input
-              value={note.title}
-              onChange={(e) => {
-                setNote((prevNote) => ({
-                  ...prevNote,
-                  title: e.target.value,
-                }));
-              }}
-              aria-label="Note title"
-              className="py-3 placeholder:text-base data-[state=closed]:hidden"
-              data-state={collapsibleState}
-              placeholder="Title"
-            />
+        <Input
+          value={note.title}
+          onChange={(e) => {
+            setNote((prevNote) => ({
+              ...prevNote,
+              title: e.target.value,
+            }));
+          }}
+          aria-label="Note title"
+          className="py-3 placeholder:text-base"
+          data-state={collapsibleState}
+          placeholder="Title"
+        />
+        <div>
+          <Textarea
+            autoFocus
+            value={note.content}
+            onChange={(e) => {
+              setNote((prevNote) => ({
+                ...prevNote,
+                content: e.target.value,
+              }));
+            }}
+            aria-label="Note content"
+            placeholder="Create note"
+          />
+        </div>
 
-            <div>
-              <Textarea
-                autoFocus
-                value={note.content}
-                onChange={(e) => {
-                  setNote((prevNote) => ({
-                    ...prevNote,
-                    content: e.target.value,
-                  }));
-                }}
-                aria-label="Note content"
-                placeholder="Create note"
-              />
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <Button
-                disabled={
-                  (!note.content && !note.title) || createNoteMutation.isPending
-                }
-                onClick={() => {
-                  createNoteMutation.mutate({ ...note, createdById: "" });
-                }}
-              >
-                {createNoteMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create"
-                )}
-              </Button>
-              <Button
-                variant={"ghost"}
-                onClick={() => setCollapsibleState("closed")}
-                disabled={createNoteMutation.isPending}
-              >
-                Close
-              </Button>
-            </div>
-          </>
-        )}
+        <div className="flex justify-end gap-3">
+          <Button
+            disabled={
+              (!note.content && !note.title) || createNoteMutation.isPending
+            }
+            onClick={() => {
+              createNoteMutation.mutate({ ...note, createdById: "" });
+            }}
+          >
+            {createNoteMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              "Create"
+            )}
+          </Button>
+          <Button
+            variant={"ghost"}
+            onClick={() => collapseAnimation()}
+            disabled={createNoteMutation.isPending}
+          >
+            Close
+          </Button>
+        </div>
       </div>
     </div>
   );

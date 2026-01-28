@@ -10,6 +10,8 @@ import {
 import { Button } from "~/components/ui/button";
 import { deleteNote } from "~/server/mutations";
 import { useEdit } from "~/hooks/use-edit";
+import { useMutation } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 export default function DeleteNoteDialog({
   noteId,
@@ -23,8 +25,21 @@ export default function DeleteNoteDialog({
   onClose: () => void;
 }) {
   const { setIsEditing, setNoteToEdit } = useEdit();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => deleteNote(noteId, noteImageKeys ?? []),
+    onSuccess: () => {
+      setIsEditing(false);
+      setNoteToEdit(null);
+      onClose();
+    },
+  });
+
   return (
-    <Dialog open={show} onOpenChange={onClose}>
+    <Dialog
+      open={show}
+      onOpenChange={(open) => !isPending && !open && onClose()}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Are you absolutely sure?</DialogTitle>
@@ -36,18 +51,17 @@ export default function DeleteNoteDialog({
         <DialogFooter>
           <Button
             variant={"destructive"}
-            onClick={async () => {
-              await deleteNote(noteId, noteImageKeys ?? []);
-              setIsEditing(false);
-              setNoteToEdit(null);
-              onClose();
-            }}
+            onClick={() => mutate()}
+            disabled={isPending}
           >
-            Yes, delete
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPending ? "Deleting..." : "Yes, delete"}
           </Button>
 
           <DialogClose asChild>
-            <Button variant={"ghost"}>Cancel</Button>
+            <Button variant={"ghost"} disabled={isPending}>
+              Cancel
+            </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

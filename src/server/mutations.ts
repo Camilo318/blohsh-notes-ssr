@@ -18,7 +18,7 @@ export const createNote = async (note: InserNote) => {
     createdById: session?.user.id,
   });
 
-  revalidatePath("/home");
+  // revalidatePath("/home");
 };
 
 export const deleteNote = async (id: string, keys: string[]) => {
