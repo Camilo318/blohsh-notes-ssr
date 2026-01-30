@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type Session } from "next-auth";
 import { getNotesByUser } from "~/server/queries";
 import Note from "~/components/Note";
-import { useDebounce } from "~/lib/hooks/useDebounce";
+import { useDebounce } from "~/hooks/useDebounce";
 import CreateNoteWizard from "~/components/CreateNoteWizard";
 import DeleteNoteDialog from "./delete-dialog";
 import AddNoteImageDialog from "./add-image-dialog";

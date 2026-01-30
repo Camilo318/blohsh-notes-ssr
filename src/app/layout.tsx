@@ -1,6 +1,7 @@
 import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
+import { inter } from "./ui/fonts";
 import SessionProvider from "~/components/SessionProvider";
 import { getServerAuthSession } from "~/server/auth";
 import Providers from "./providers";
@@ -19,8 +20,10 @@ export default async function RootLayout({
 }) {
   const session = await getServerAuthSession();
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
-      <body className="flex min-h-svh flex-col">
+    <html lang="en">
+      <body
+        className={`${inter.className} flex min-h-svh flex-col antialiased`}
+      >
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <SessionProvider session={session}>{children}</SessionProvider>

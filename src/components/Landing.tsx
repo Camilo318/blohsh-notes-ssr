@@ -15,6 +15,7 @@ import { useGSAP } from "@gsap/react";
 
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TextPlugin } from "gsap/TextPlugin";
+import { spaceGrotesk } from "~/app/ui/fonts";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, TextPlugin);
 
@@ -24,7 +25,7 @@ export function Landing() {
 
     features.forEach((feature) => {
       gsap.from(feature, {
-        ease: "power3.inOut",
+        ease: "power3.out",
         autoAlpha: 0,
         y: 41,
         duration: 0.88,
@@ -184,7 +185,7 @@ export function Landing() {
 
           {/* Content area - white/dark background like Note component */}
           <div className="p-4 md:p-6">
-            <CardContent className="flex flex-col gap-4 rounded-2xl bg-white/50 p-6 shadow-inner backdrop-blur-md md:p-8 dark:bg-white/5">
+            <CardContent className="flex flex-col gap-4 rounded-2xl bg-slate-200/50 p-6 shadow-inner backdrop-blur-md md:p-8 dark:bg-white/5">
               {/* Tags row like Note component */}
               <div className="mb-4 flex flex-wrap gap-2">
                 <Badge
@@ -201,28 +202,30 @@ export function Landing() {
                 </Badge>
               </div>
 
-              <p className="feature text-note-rose-text">Create notes</p>
-              <p className="feature text-note-mint-text">Edit notes</p>
-              <p className="feature text-note-cream-text">Delete notes</p>
-              <p className="feature text-note-sky-text">Share notes</p>
-              <p className="feature text-note-lavender-text">Sort notes</p>
-              <p className="feature text-note-rose-text">Your notes</p>
-              <p className="feature text-note-mint-text">Your info</p>
-              <p className="secret text-note-sky-text">
-                Keep it<> </>
-                <span className="secure-1 inline-block">******</span>
-              </p>
-              <p className="secret text-note-lavender-text">
-                Keep it<> </>
-                <span className="secure-2 inline-block">****</span>
-              </p>
+              <div className={spaceGrotesk.className}>
+                <p className="feature text-note-rose-text">Create notes</p>
+                <p className="feature text-note-mint-text">Edit notes</p>
+                <p className="feature text-note-cream-text">Delete notes</p>
+                <p className="feature text-note-sky-text">Share notes</p>
+                <p className="feature text-note-lavender-text">Sort notes</p>
+                <p className="feature text-note-rose-text">Your notes</p>
+                <p className="feature text-note-mint-text">Your info</p>
+                <p className="secret text-note-sky-text">
+                  Keep it<> </>
+                  <span className="secure-1 inline-block">******</span>
+                </p>
+                <p className="secret text-note-lavender-text">
+                  Keep it<> </>
+                  <span className="secure-2 inline-block">****</span>
+                </p>
+              </div>
             </CardContent>
           </div>
         </Card>
 
         {/* Feature cards grid with colors */}
-        <div className="relative mx-auto grid max-w-[1000px] grid-cols-[repeat(auto-fit,_minmax(280px,_1fr))] gap-6 px-4 py-8">
-          <div className="col-span-full mb-8 flex flex-col items-center gap-4">
+        <div className="relative mx-auto grid max-w-[1000px] auto-rows-[max-content,max-content] grid-cols-[repeat(auto-fit,_minmax(280px,_1fr))] gap-6 px-4 py-8">
+          <div className="col-span-full row-span-2 flex flex-col items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="h-1 w-12 rounded-full bg-gradient-to-r from-note-rose to-note-cream" />
               <h2 className="text-4xl font-extrabold tracking-tight md:text-5xl">
@@ -239,21 +242,21 @@ export function Landing() {
           <FeatureItem
             icon={"/notes.svg"}
             colorVariant={noteColorVariants[0]}
-            accentIcon={<Star className="h-4 w-4" />}
+            accentIcon={<Star className="size-7" />}
           >
             <h3 className="text-lg font-bold text-note-rose-text">
-              Your notes, a piece of cake
+              Your notes, at your fingertips
             </h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Keeping important info has never been easier. Create, edit, and
-              organize effortlessly.
+              Save ideas has never been easier. Create, edit, and organize
+              effortlessly.
             </p>
           </FeatureItem>
 
           <FeatureItem
             icon={"/secure.svg"}
             colorVariant={noteColorVariants[1]}
-            accentIcon={<Heart className="h-4 w-4" />}
+            accentIcon={<Heart className="size-7" />}
           >
             <h3 className="text-lg font-bold text-note-mint-text">
               Privacy, a big deal
@@ -267,7 +270,7 @@ export function Landing() {
           <FeatureItem
             icon={"/responsive.svg"}
             colorVariant={noteColorVariants[3]}
-            accentIcon={<Zap className="h-4 w-4" />}
+            accentIcon={<Zap className="size-7" />}
           >
             <h3 className="text-lg font-bold text-note-sky-text">
               Notes, notes everywhere
@@ -281,7 +284,7 @@ export function Landing() {
           <FeatureItem
             icon={"/sort.svg"}
             colorVariant={noteColorVariants[4]}
-            accentIcon={<Sparkles className="h-4 w-4" />}
+            accentIcon={<Sparkles className="size-7" />}
           >
             <h3 className="text-lg font-bold text-note-lavender-text">
               Find stuff fast
@@ -316,7 +319,7 @@ export function Landing() {
 
             <Button
               size="lg"
-              className="group relative overflow-hidden bg-note-lavender px-10 py-7 text-lg font-bold text-note-lavender-text shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              className="group relative overflow-hidden bg-note-lavender px-10 py-7 text-lg font-bold text-note-lavender-text shadow-sm transition-all duration-300 hover:scale-105 hover:bg-note-lavender/80"
               onClick={() => {
                 if (session.data?.user.id) {
                   router.push("/home");
@@ -360,7 +363,7 @@ const FeatureItem = ({
 }) => {
   return (
     <Card
-      className={`liquid-glass group relative overflow-hidden rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md`}
+      className={`liquid-glass group relative row-span-2 grid grid-rows-subgrid gap-0 overflow-hidden rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md`}
     >
       {/* Gradient overlay on hover */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -378,7 +381,7 @@ const FeatureItem = ({
       </CardHeader>
 
       {/* Content area */}
-      <CardContent className="relative mx-3 mb-3 flex flex-col gap-3 rounded-xl bg-white/40 p-5 shadow-inner backdrop-blur-md dark:bg-white/5">
+      <CardContent className="relative mx-3 mb-3 flex flex-col gap-3 rounded-xl bg-slate-200/50 p-5 shadow-inner backdrop-blur-md dark:bg-white/5">
         {children}
       </CardContent>
     </Card>
