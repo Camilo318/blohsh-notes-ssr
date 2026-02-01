@@ -1,10 +1,30 @@
 "use server";
 
 import { db } from "./db";
-import { notes } from "./db/schema";
+import { notes, type Importance } from "./db/schema";
 import { eq } from "drizzle-orm";
-// import { images, notes } from "./db/schema";
-// import { eq, desc, ilike, or, and } from "drizzle-orm";
+
+// Helper to transform raw note data into the shape expected by components
+function transformNote<
+  T extends {
+    notebook?: { name: string } | null;
+    noteTags?: Array<{ tag: { name: string } | null }>;
+    importance: string;
+  },
+>(
+  note: T,
+): Omit<T, "notebook" | "noteTags"> & {
+  notebook: string | null;
+  tags: string[];
+  importance: Importance;
+} {
+  return {
+    ...note,
+    notebook: note.notebook?.name ?? null,
+    tags: note.noteTags?.map((nt) => nt.tag?.name).filter(Boolean) as string[],
+    importance: note.importance as Importance,
+  };
+}
 
 export const getNotesByUser = async (userId: string, searchQuery = "") => {
   try {
@@ -12,6 +32,12 @@ export const getNotesByUser = async (userId: string, searchQuery = "") => {
       with: {
         author: true,
         images: true,
+        notebook: true,
+        noteTags: {
+          with: {
+            tag: true,
+          },
+        },
       },
       where: (fields, { eq, and, ilike, or }) =>
         and(
@@ -26,22 +52,7 @@ export const getNotesByUser = async (userId: string, searchQuery = "") => {
       orderBy: (fields, { desc }) => desc(fields.createdAt),
     });
 
-    // const userNotes = await db
-    //   .select()
-    //   .from(notes)
-    //   .where(
-    //     and(
-    //       eq(notes.createdById, userId),
-    //       or(
-    //         ilike(notes.content, `%${searchQuery}%`),
-    //         ilike(notes.title, `%${searchQuery}%`),
-    //       ),
-    //     ),
-    //   )
-    //   .leftJoin(images, eq(notes.id, images.noteId))
-    //   .orderBy(desc(notes.createdAt));
-
-    return userNotes;
+    return userNotes.map(transformNote);
   } catch (error) {
     console.error("Error fetching notes:", error);
     throw new Error("Failed to fetch notes");
@@ -54,9 +65,17 @@ export const getNoteById = async (id: string) => {
       images: {
         orderBy: (fields, { desc }) => desc(fields.createdAt),
       },
+      notebook: true,
+      noteTags: {
+        with: {
+          tag: true,
+        },
+      },
     },
-
     where: eq(notes.id, id),
   });
-  return note;
+
+  if (!note) return null;
+
+  return transformNote(note);
 };

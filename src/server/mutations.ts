@@ -5,7 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { getServerAuthSession } from "./auth";
 import { db } from "./db";
 import { utapi } from "./uploadthing";
-import { images, notes, type InserNote } from "./db/schema";
+import { images, notes, type InserNote, type Importance } from "./db/schema";
 
 export const createNote = async (note: InserNote) => {
   const session = await getServerAuthSession();
@@ -16,6 +16,9 @@ export const createNote = async (note: InserNote) => {
     title: note.title,
     content: note.content,
     createdById: session?.user.id,
+    importance: "Medium",
+    notebookId: null,
+    color: null,
   });
 
   // revalidatePath("/home");
@@ -58,20 +61,40 @@ export const editTodo = async ({
   title,
   content,
   id,
+  importance,
+  notebookId,
+  color,
 }: {
   title: string;
   content: string;
   id: string;
+  importance?: Importance;
+  notebookId?: string | null;
+  color?: string | null;
 }) => {
   const session = await getServerAuthSession();
 
   if (!session?.user.id) throw new Error("Unauthorized");
+
+  // Build the update object with only provided fields
+  const updateData: Partial<{
+    title: string;
+    content: string;
+    importance: string;
+    notebookId: string | null;
+    color: string | null;
+  }> = {
+    title,
+    content,
+  };
+
+  if (importance !== undefined) updateData.importance = importance;
+  if (notebookId !== undefined) updateData.notebookId = notebookId;
+  if (color !== undefined) updateData.color = color;
+
   const [updatedNote] = await db
     .update(notes)
-    .set({
-      title: title,
-      content: content,
-    })
+    .set(updateData)
     .where(and(eq(notes.id, id), eq(notes.createdById, session.user.id)))
     .returning();
 

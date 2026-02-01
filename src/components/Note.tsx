@@ -29,70 +29,6 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { useEdit } from "~/hooks/use-edit";
 
-// Generate a category display name from the note
-function getCategoryDisplay(note: SelectNote): string {
-  if (note.category) return note.category;
-  // Use first word of title or fallback
-  const firstWord = note.title.split(" ")[0];
-  return firstWord && firstWord.length > 2 ? firstWord : "Notes";
-}
-
-// Generate mock tags based on note content
-function getMockTags(note: SelectNote): { label: string; emoji: string }[] {
-  const category = note.category?.toLowerCase() ?? "";
-  const title = note.title.toLowerCase();
-  const content = note.content.toLowerCase();
-
-  const tags: { label: string; emoji: string }[] = [];
-
-  // Add tags based on content keywords
-  if (
-    title.includes("study") ||
-    content.includes("study") ||
-    title.includes("lecture")
-  ) {
-    tags.push({ label: "Studies", emoji: "📚" });
-  }
-  if (
-    title.includes("university") ||
-    content.includes("university") ||
-    title.includes("school")
-  ) {
-    tags.push({ label: "University", emoji: "🏫" });
-  }
-  if (
-    title.includes("food") ||
-    content.includes("recipe") ||
-    title.includes("grocery") ||
-    title.includes("chicken")
-  ) {
-    tags.push({ label: "Food", emoji: "🍔" });
-  }
-  if (title.includes("diary") || content.includes("feeling")) {
-    tags.push({ label: "Diary", emoji: "📔" });
-  }
-  if (title.includes("thought") || content.includes("thinking")) {
-    tags.push({ label: "Thoughts", emoji: "💭" });
-  }
-  if (
-    category === "work" ||
-    title.includes("work") ||
-    title.includes("meeting")
-  ) {
-    tags.push({ label: "Work", emoji: "💼" });
-  }
-  if (title.includes("idea") || content.includes("idea")) {
-    tags.push({ label: "Ideas", emoji: "💡" });
-  }
-
-  // If no tags matched, add a default one
-  if (tags.length === 0) {
-    tags.push({ label: "Personal", emoji: "✨" });
-  }
-
-  return tags.slice(0, 2); // Max 2 tags
-}
-
 const Note = ({
   note,
   className,
@@ -109,8 +45,7 @@ const Note = ({
   const { setIsEditing, setNoteToEdit, noteToEditId } = useEdit();
 
   const colorVariant = getColorVariant(note.id);
-  const categoryDisplay = getCategoryDisplay(note);
-  const tags = getMockTags(note);
+  const tags = note.tags ?? [];
 
   return (
     <Card
@@ -127,7 +62,7 @@ const Note = ({
         <CardTitle
           className={cn("text-base font-semibold", colorVariant.headerText)}
         >
-          {categoryDisplay}
+          {note.notebook ?? "Notes"}
         </CardTitle>
 
         <div className="flex items-center gap-2">
@@ -207,21 +142,23 @@ const Note = ({
         {/* Inner Content Card */}
         <CardContent className="flex h-full flex-col gap-4 rounded-2xl bg-note-content-bg/80 py-6 backdrop-blur-sm">
           {/* Tags */}
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className={cn(
-                  "px-2.5 py-1 text-xs font-medium",
-                  colorVariant.border,
-                  "border bg-white/50 dark:bg-white/10",
-                )}
-              >
-                {tag.label} {tag.emoji}
-              </Badge>
-            ))}
-          </div>
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {tags.slice(0, 2).map((tag, index) => (
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className={cn(
+                    "px-2.5 py-1 text-xs font-medium",
+                    colorVariant.border,
+                    "border bg-white/50 dark:bg-white/10",
+                  )}
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           {/* Title */}
           <CardTitle className="line-clamp-2 text-xl leading-snug text-card-foreground">

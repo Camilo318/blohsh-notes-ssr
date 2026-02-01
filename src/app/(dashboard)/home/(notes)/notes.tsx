@@ -11,9 +11,15 @@ import { useDebounce } from "~/hooks/useDebounce";
 import CreateNoteWizard from "~/components/CreateNoteWizard";
 import DeleteNoteDialog from "./delete-dialog";
 import AddNoteImageDialog from "./add-image-dialog";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { ModeToggle } from "~/components/ModeToggle";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "~/components/ui/input-group";
 gsap.registerPlugin(useGSAP);
 
 export default function NotesContainer({ user }: { user: Session["user"] }) {
@@ -92,16 +98,32 @@ export default function NotesContainer({ user }: { user: Session["user"] }) {
           <SidebarTrigger className="h-9 w-9 shrink-0 rounded-full hover:bg-blohsh-hover" />
 
           {/* Search Input */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
+          <InputGroup className="h-10 flex-1 rounded-xl border-0 bg-secondary/60 dark:bg-secondary/80">
+            <InputGroupInput
               type="text"
               placeholder="Search a note"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-full rounded-xl border-0 bg-secondary/60 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 dark:bg-secondary/80"
             />
-          </div>
+
+            <InputGroupAddon align="inline-start">
+              <Search className="h-4 w-4" />
+            </InputGroupAddon>
+
+            {searchQuery && (
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  size="icon-xs"
+                  variant="ghost"
+                  onClick={() => setSearchQuery("")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  <span className="sr-only">Clear search</span>
+                </InputGroupButton>
+              </InputGroupAddon>
+            )}
+          </InputGroup>
 
           <ModeToggle
             variant="ghost"

@@ -6,6 +6,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -18,6 +19,72 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `blohsh-notes-ssr_${name}`);
 
+// Importance enum values
+export const importanceValues = ["High", "Medium", "Low"] as const;
+export type Importance = (typeof importanceValues)[number];
+
+// Notebooks table
+export const notebooks = createTable(
+  "notebook",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name", { length: 255 }).notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    userNameIdx: uniqueIndex("notebook_user_name_idx").on(
+      table.userId,
+      table.name,
+    ),
+  }),
+);
+
+// Tags table
+export const tags = createTable(
+  "tag",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name", { length: 255 }).notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    userNameIdx: uniqueIndex("tag_user_name_idx").on(table.userId, table.name),
+  }),
+);
+
+// Notes to Tags join table
+export const notesToTags = createTable(
+  "notes_to_tags",
+  {
+    noteId: text("note_id")
+      .notNull()
+      .references(() => notes.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.noteId, table.tagId] }),
+  }),
+);
+
 export const notes = createTable(
   "note",
   {
@@ -26,7 +93,14 @@ export const notes = createTable(
       .$defaultFn(() => crypto.randomUUID()),
     title: varchar("title", { length: 255 }).notNull(),
     content: text("content").notNull(),
-    category: varchar("category", { length: 100 }),
+    notebookId: text("notebook_id").references(() => notebooks.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    importance: varchar("importance", { length: 10 })
+      .notNull()
+      .default("Medium"),
+    color: varchar("color", { length: 50 }),
     createdById: text("createdById")
       .notNull()
       .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -81,16 +155,38 @@ export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   notes: many(notes),
   images: many(images),
+  notebooks: many(notebooks),
+  tags: many(tags),
 }));
 
 export const notesRelations = relations(notes, ({ one, many }) => ({
   author: one(users, { fields: [notes.createdById], references: [users.id] }),
   images: many(images),
+  notebook: one(notebooks, {
+    fields: [notes.notebookId],
+    references: [notebooks.id],
+  }),
+  noteTags: many(notesToTags),
 }));
 
 export const imagesRelations = relations(images, ({ one }) => ({
   note: one(notes, { fields: [images.noteId], references: [notes.id] }),
   user: one(users, { fields: [images.userId], references: [users.id] }),
+}));
+
+export const notebooksRelations = relations(notebooks, ({ one, many }) => ({
+  user: one(users, { fields: [notebooks.userId], references: [users.id] }),
+  notes: many(notes),
+}));
+
+export const tagsRelations = relations(tags, ({ one, many }) => ({
+  user: one(users, { fields: [tags.userId], references: [users.id] }),
+  noteTags: many(notesToTags),
+}));
+
+export const notesToTagsRelations = relations(notesToTags, ({ one }) => ({
+  note: one(notes, { fields: [notesToTags.noteId], references: [notes.id] }),
+  tag: one(tags, { fields: [notesToTags.tagId], references: [tags.id] }),
 }));
 
 export const accounts = createTable(
@@ -169,7 +265,15 @@ export type InserNote = typeof notes.$inferInsert;
 
 export type SelectNote = typeof notes.$inferSelect & {
   images?: SelectImage[];
+  notebook?: string | null;
+  tags?: string[];
 };
 
 export type InsertImage = typeof images.$inferInsert;
 export type SelectImage = typeof images.$inferSelect;
+
+export type InsertNotebook = typeof notebooks.$inferInsert;
+export type SelectNotebook = typeof notebooks.$inferSelect;
+
+export type InsertTag = typeof tags.$inferInsert;
+export type SelectTag = typeof tags.$inferSelect;

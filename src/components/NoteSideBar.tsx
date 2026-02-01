@@ -26,6 +26,11 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Badge } from "~/components/ui/badge";
 import {
+  NotionTagSelect,
+  ImportanceSelect,
+} from "~/components/ui/notion-tag-select";
+import { type Importance } from "~/server/db/schema";
+import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -66,22 +71,24 @@ export default function NoteSideBar({
   isLoading = false,
 }: NoteSideBarProps) {
   const queryClient = useQueryClient();
-  const [notebook] = useState(note?.notebook ?? "Essays");
-  const [tags] = useState(note?.tags ?? ["University", "Literature"]);
-  const [importance] = useState<"High" | "Medium" | "Low">(
-    note?.importance ?? "High",
-  );
+  const notebook = note?.notebook ?? null;
 
   const attachments = note?.images ?? [];
 
-  const [title, setTitle] = useState(note?.title ?? "Northanger Abbey essay");
+  const [title, setTitle] = useState(note?.title ?? "");
   const [content, setContent] = useState(note?.content ?? "");
+  const [editableTags, setEditableTags] = useState<string[]>(note?.tags ?? []);
+  const [editableImportance, setEditableImportance] = useState<Importance>(
+    note?.importance ?? "Medium",
+  );
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
 
   useEffect(() => {
     setTitle(note?.title ?? "");
     setContent(note?.content ?? "");
-  }, [note?.title, note?.content]);
+    setEditableTags(note?.tags ?? []);
+    setEditableImportance(note?.importance ?? "Medium");
+  }, [note?.title, note?.content, note?.tags, note?.importance]);
 
   const editNoteMutation = useMutation({
     mutationFn: editTodo,
@@ -183,7 +190,7 @@ export default function NoteSideBar({
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="h-7 border-0 bg-sidebar-accent text-lg font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-7 bg-sidebar-accent text-lg font-medium"
                   placeholder="Note title"
                 />
               )}
@@ -194,61 +201,69 @@ export default function NoteSideBar({
         {/* Metadata */}
         <SidebarGroup>
           <SidebarGroupContent>
-            <div className="space-y-3">
+            <div className="space-y-4">
+              {/* Notebook (read-only for now) */}
               <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
+                <BookOpen className="h-4 w-4 shrink-0" />
                 <span className="text-sm text-sidebar-foreground">
                   Notebook:
                 </span>
                 {isLoading ? (
                   <Skeleton className="h-6 w-20" />
-                ) : (
+                ) : notebook ? (
                   <Badge
                     variant="secondary"
-                    className="bg-green-100 text-green-800"
+                    className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                   >
                     {notebook}
                   </Badge>
+                ) : (
+                  <span className="text-sm text-muted-foreground">None</span>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 overflow-hidden">
-                <Tag className="h-4 w-4" />
-                <span className="text-sm text-sidebar-foreground">Tags:</span>
+              {/* Editable Tags */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Tag className="h-4 w-4 shrink-0" />
+                  <span className="text-sm text-sidebar-foreground">Tags:</span>
+                </div>
                 {isLoading ? (
-                  <div className="flex gap-1">
+                  <div className="flex min-w-0 gap-1 pl-6">
                     <Skeleton className="h-6 w-16" />
                     <Skeleton className="h-6 w-20" />
                   </div>
                 ) : (
-                  <div className="flex gap-1">
-                    {tags.map((tag, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="text-xs"
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
+                  <div className="pl-6">
+                    <NotionTagSelect
+                      value={editableTags}
+                      onChange={setEditableTags}
+                      placeholder="Add tags..."
+                    />
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                <span className="text-sm text-sidebar-foreground">
-                  Importance:
-                </span>
+              {/* Editable Importance */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span className="text-sm text-sidebar-foreground">
+                    Importance:
+                  </span>
+                </div>
                 {isLoading ? (
-                  <div className="flex items-center gap-1">
-                    <Skeleton className="h-2 w-2 rounded-full" />
-                    <Skeleton className="h-4 w-12" />
+                  <div className="flex items-center gap-1 pl-6">
+                    <Skeleton className="h-7 w-16" />
+                    <Skeleton className="h-7 w-20" />
+                    <Skeleton className="h-7 w-16" />
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1">
-                    <div className="h-2 w-2 rounded-full bg-red-500" />
-                    <span className="text-sm font-medium">{importance}</span>
+                  <div className="pl-6">
+                    <ImportanceSelect
+                      value={editableImportance}
+                      onChange={setEditableImportance}
+                    />
                   </div>
                 )}
               </div>
@@ -289,7 +304,7 @@ export default function NoteSideBar({
             </div>
 
             {/* Text Area */}
-            <div className="flex-1">
+            <div className="text-composer">
               {isLoading ? (
                 <div className="min-h-72 rounded-md bg-sidebar-accent p-3">
                   <Skeleton className="h-full w-full" />
@@ -298,12 +313,12 @@ export default function NoteSideBar({
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="min-h-72 resize-none rounded-b-none border-0 bg-sidebar-accent text-sm leading-relaxed focus-visible:ring-0"
+                  className="min-h-72 resize-none bg-sidebar-accent text-sm leading-relaxed"
                   placeholder="Start writing your note..."
                 />
               )}
               {/* Actions */}
-              <div className="flex items-center justify-between rounded-b-md bg-sidebar-accent p-3">
+              <div className="mt-3 flex items-center justify-between">
                 <Button
                   size="sm"
                   onClick={() => {
@@ -311,6 +326,7 @@ export default function NoteSideBar({
                       title,
                       content,
                       id: note?.id ?? "",
+                      importance: editableImportance,
                     });
                   }}
                   disabled={isLoading || editNoteMutation.isPending}
