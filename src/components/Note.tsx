@@ -62,7 +62,7 @@ const Note = ({
         <CardTitle
           className={cn("text-base font-semibold", colorVariant.headerText)}
         >
-          {note.notebook ?? "Notes"}
+          {note.title ?? "Note title"}
         </CardTitle>
 
         <div className="flex items-center gap-2">
@@ -144,7 +144,7 @@ const Note = ({
           {/* Tags */}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {tags.slice(0, 2).map((tag, index) => (
+              {tags.slice(0, 3).map((tag, index) => (
                 <Badge
                   key={index}
                   variant="secondary"

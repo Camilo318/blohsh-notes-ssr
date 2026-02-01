@@ -71,6 +71,7 @@ function getTagColor(tagName: string) {
 }
 
 export interface TagOption {
+  id: string;
   value: string;
   label: string;
   color?: string;

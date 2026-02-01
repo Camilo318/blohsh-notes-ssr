@@ -29,7 +29,7 @@ import {
   NotionTagSelect,
   ImportanceSelect,
 } from "~/components/ui/notion-tag-select";
-import { type Importance } from "~/server/db/schema";
+import { type SelectTag, type Importance } from "~/server/db/schema";
 import {
   Drawer,
   DrawerContent,
@@ -46,6 +46,7 @@ import { toast } from "sonner";
 interface NoteSideBarMobileProps {
   isOpen: boolean;
   handleOpenChanges: (open: boolean) => void;
+  tags?: SelectTag[];
   note?: SelectNote &
     Partial<{
       notebook?: string;
@@ -66,6 +67,7 @@ export default function NoteSideBarMobile({
   handleOpenChanges,
   note,
   isLoading = false,
+  tags = [],
 }: NoteSideBarMobileProps) {
   const queryClient = useQueryClient();
   const notebook = note?.notebook ?? null;
@@ -89,10 +91,18 @@ export default function NoteSideBarMobile({
 
   const editNoteMutation = useMutation({
     mutationFn: editTodo,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: ["noteToEdit", note?.id],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["noteToEdit", note?.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["tags"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["notes"],
+        }),
+      ]);
       toast.success("Note saved successfully", {
         description: "Your changes have been saved.",
       });
@@ -115,8 +125,8 @@ export default function NoteSideBarMobile({
     onMutate: ({ id }) => {
       setDeletingImageId(id);
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: ["noteToEdit", note?.id],
       });
       toast.success("Image deleted successfully", {
@@ -214,6 +224,11 @@ export default function NoteSideBarMobile({
                       value={editableTags}
                       onChange={setEditableTags}
                       placeholder="Add tags..."
+                      options={tags?.map((tag) => ({
+                        id: tag.id,
+                        value: tag.name,
+                        label: tag.name,
+                      }))}
                     />
                   </div>
                 )}
@@ -300,6 +315,7 @@ export default function NoteSideBarMobile({
                       content,
                       id: note?.id ?? "",
                       importance: editableImportance,
+                      tags: editableTags,
                     });
                   }}
                   disabled={isLoading || editNoteMutation.isPending}

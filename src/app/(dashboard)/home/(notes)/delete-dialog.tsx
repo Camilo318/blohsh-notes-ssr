@@ -10,7 +10,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { deleteNote } from "~/server/mutations";
 import { useEdit } from "~/hooks/use-edit";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
 export default function DeleteNoteDialog({
@@ -24,11 +24,16 @@ export default function DeleteNoteDialog({
   show: boolean;
   onClose: () => void;
 }) {
+  const queryClient = useQueryClient();
+
   const { setIsEditing, setNoteToEdit } = useEdit();
 
   const { mutate, isPending } = useMutation({
     mutationFn: () => deleteNote(noteId, noteImageKeys ?? []),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["noteToEdit", noteId],
+      });
       setIsEditing(false);
       setNoteToEdit(null);
       onClose();

@@ -95,7 +95,7 @@ export default function CreateNoteWizard() {
 
   const createNoteMutation = useMutation({
     mutationFn: createNote,
-    onSuccess: () => {
+    onSuccess: async () => {
       setNote({ title: "", content: "" });
       collapseAnimation();
       toast.success("Note created successfully", {
@@ -103,11 +103,14 @@ export default function CreateNoteWizard() {
         position: "top-right",
       });
 
-      setTimeout(() => {
-        void queryClient.invalidateQueries({
+      await Promise.all([
+        queryClient.invalidateQueries({
           queryKey: ["notes"],
-        });
-      }, 1000);
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["tags"],
+        }),
+      ]);
     },
     onError: (error) => {
       console.error("Failed to create note:", error);

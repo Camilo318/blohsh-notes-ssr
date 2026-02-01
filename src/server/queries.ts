@@ -14,13 +14,13 @@ function transformNote<
 >(
   note: T,
 ): Omit<T, "notebook" | "noteTags"> & {
-  notebook: string | null;
+  notebook?: string;
   tags: string[];
   importance: Importance;
 } {
   return {
     ...note,
-    notebook: note.notebook?.name ?? null,
+    notebook: note.notebook?.name,
     tags: note.noteTags?.map((nt) => nt.tag?.name).filter(Boolean) as string[],
     importance: note.importance as Importance,
   };
@@ -78,4 +78,16 @@ export const getNoteById = async (id: string) => {
   if (!note) return null;
 
   return transformNote(note);
+};
+
+export const getTagsByUser = async (userId: string | undefined) => {
+  if (!userId) return [];
+
+  const tags = await db.query.tags.findMany({
+    where: (fields, { eq }) => eq(fields.userId, userId),
+    orderBy: (fields, { asc }) => asc(fields.createdAt),
+  });
+
+  console.log(tags);
+  return tags;
 };

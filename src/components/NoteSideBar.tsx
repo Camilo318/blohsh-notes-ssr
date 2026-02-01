@@ -29,7 +29,7 @@ import {
   NotionTagSelect,
   ImportanceSelect,
 } from "~/components/ui/notion-tag-select";
-import { type Importance } from "~/server/db/schema";
+import { type SelectTag, type Importance } from "~/server/db/schema";
 import {
   Sidebar,
   SidebarContent,
@@ -49,6 +49,7 @@ import { useMediaQuery } from "~/hooks/use-media-query";
 interface NoteSideBarProps {
   isOpen: boolean;
   handleOpenChanges: (open: boolean) => void;
+  tags?: SelectTag[];
   note?: SelectNote &
     Partial<{
       notebook?: string;
@@ -69,6 +70,7 @@ export default function NoteSideBar({
   handleOpenChanges,
   note,
   isLoading = false,
+  tags = [],
 }: NoteSideBarProps) {
   const queryClient = useQueryClient();
   const notebook = note?.notebook ?? null;
@@ -92,10 +94,18 @@ export default function NoteSideBar({
 
   const editNoteMutation = useMutation({
     mutationFn: editTodo,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: ["noteToEdit", note?.id],
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["noteToEdit", note?.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["tags"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["notes"],
+        }),
+      ]);
       toast.success("Note saved successfully", {
         description: "Your changes have been saved.",
       });
@@ -143,6 +153,7 @@ export default function NoteSideBar({
         handleOpenChanges={handleOpenChanges}
         note={note}
         isLoading={isLoading}
+        tags={tags ?? []}
       />
     );
   }
@@ -239,6 +250,11 @@ export default function NoteSideBar({
                       value={editableTags}
                       onChange={setEditableTags}
                       placeholder="Add tags..."
+                      options={tags.map((tag) => ({
+                        id: tag.id,
+                        label: tag.name,
+                        value: tag.name,
+                      }))}
                     />
                   </div>
                 )}
@@ -327,6 +343,7 @@ export default function NoteSideBar({
                       content,
                       id: note?.id ?? "",
                       importance: editableImportance,
+                      tags: editableTags,
                     });
                   }}
                   disabled={isLoading || editNoteMutation.isPending}
