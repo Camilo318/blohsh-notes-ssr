@@ -42,6 +42,7 @@ import Image from "next/image";
 import { deleteImage, editTodo } from "~/server/mutations";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import Viewer from "./Viewer";
 
 interface NoteSideBarMobileProps {
   isOpen: boolean;
@@ -81,6 +82,15 @@ export default function NoteSideBarMobile({
     note?.importance ?? "Medium",
   );
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+
+  // Viewer state
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+
+  const openViewer = (index: number) => {
+    setViewerIndex(index);
+    setViewerOpen(true);
+  };
 
   useEffect(() => {
     setTitle(note?.title ?? "");
@@ -367,7 +377,14 @@ export default function NoteSideBarMobile({
                       <Skeleton className="h-20 w-full rounded-lg" />
                     ) : (
                       <>
-                        <div className="relative h-20 w-20 overflow-hidden">
+                        <button
+                          type="button"
+                          className="relative h-20 w-20 cursor-pointer overflow-hidden focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          onClick={() =>
+                            openViewer(attachments.indexOf(attachment))
+                          }
+                          aria-label={`View ${attachment.altText ?? "image"}`}
+                        >
                           <Image
                             src={attachment.imageSrc ?? ""}
                             alt={attachment.altText ?? ""}
@@ -375,9 +392,9 @@ export default function NoteSideBarMobile({
                             height={100}
                             className="aspect-square object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
                           />
-                        </div>
+                        </button>
 
-                        <div className="flex flex-1 gap-3 p-2 pl-0">
+                        <div className="flex min-w-0 flex-1 gap-3 p-2 pl-0">
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium text-foreground">
                               {attachment.altText}
@@ -420,6 +437,15 @@ export default function NoteSideBarMobile({
           </div>
         </div>
       </DrawerContent>
+
+      {/* Image Viewer */}
+      <Viewer
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        images={attachments}
+        index={viewerIndex}
+        onIndexChange={setViewerIndex}
+      />
     </Drawer>
   );
 }
