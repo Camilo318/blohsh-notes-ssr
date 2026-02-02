@@ -85,7 +85,7 @@ export const getTagsByUser = async (userId: string | undefined) => {
 
   const tags = await db.query.tags.findMany({
     where: (fields, { eq }) => eq(fields.userId, userId),
-    orderBy: (fields, { asc }) => asc(fields.createdAt),
+    orderBy: (fields, { desc }) => desc(fields.createdAt),
   });
 
   console.log(tags);

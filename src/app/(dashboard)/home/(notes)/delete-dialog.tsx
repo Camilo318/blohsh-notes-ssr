@@ -31,9 +31,14 @@ export default function DeleteNoteDialog({
   const { mutate, isPending } = useMutation({
     mutationFn: () => deleteNote(noteId, noteImageKeys ?? []),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["noteToEdit", noteId],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["noteToEdit", noteId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["notes"],
+        }),
+      ]);
       setIsEditing(false);
       setNoteToEdit(null);
       onClose();

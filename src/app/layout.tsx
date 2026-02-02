@@ -1,6 +1,6 @@
 import "~/styles/globals.css";
 
-import { GeistSans } from "geist/font/sans";
+// import { GeistSans } from "geist/font/sans";
 import { inter } from "./ui/fonts";
 import SessionProvider from "~/components/SessionProvider";
 import { getServerAuthSession } from "~/server/auth";
