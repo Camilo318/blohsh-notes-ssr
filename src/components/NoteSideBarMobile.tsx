@@ -270,10 +270,7 @@ export default function NoteSideBarMobile({
                 <Skeleton className="h-full w-full" />
               </div>
             ) : (
-              <Composer
-                key={note?.id}
-                defaultContent={note?.content ?? ""}
-              >
+              <Composer key={note?.id} defaultContent={note?.content ?? ""}>
                 <div className="sticky top-0 z-10 -mb-2">
                   <ComposerCommonButtons />
                 </div>
