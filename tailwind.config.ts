@@ -115,11 +115,74 @@ const config = {
         "3xl":
           "0 1px 2px 0 rgba(60, 64, 67, 0.302), 0 2px 6px 2px rgba(60, 64, 67, 0.149)",
       },
+      typography: ({ theme }: { theme: (path: string) => string }) => ({
+        DEFAULT: {
+          css: {
+            // Map Tailwind Typography variables to shadcn/ui theme tokens (CSS variables)
+            "--tw-prose-body": "hsl(var(--foreground))",
+            "--tw-prose-headings": "hsl(var(--foreground))",
+            "--tw-prose-lead": "hsl(var(--muted-foreground))",
+            "--tw-prose-links": "hsl(var(--primary))",
+            "--tw-prose-bold": "hsl(var(--foreground))",
+            "--tw-prose-counters": "hsl(var(--muted-foreground))",
+            "--tw-prose-bullets": "hsl(var(--muted-foreground))",
+            "--tw-prose-hr": "hsl(var(--border))",
+            "--tw-prose-quotes": "hsl(var(--foreground))",
+            // Slightly stronger quote borders for dark mode readability
+            "--tw-prose-quote-borders": "hsl(var(--foreground) / 0.15)",
+            "--tw-prose-captions": "hsl(var(--muted-foreground))",
+            "--tw-prose-code": "hsl(var(--foreground))",
+            "--tw-prose-pre-code": "hsl(var(--foreground))",
+            // Use a subtle "lift" background that works in both themes
+            "--tw-prose-pre-bg": "hsl(var(--foreground) / 0.06)",
+            "--tw-prose-th-borders": "hsl(var(--foreground) / 0.12)",
+            "--tw-prose-td-borders": "hsl(var(--foreground) / 0.12)",
+
+            // Optional fine-tuning for better contrast + shadcn feel
+            a: {
+              fontWeight: theme("fontWeight.medium"),
+              textDecoration: "none",
+            },
+            "a:hover": {
+              textDecoration: "underline",
+            },
+            code: {
+              fontWeight: theme("fontWeight.medium"),
+            },
+            ":not(pre) > code": {
+              color: "hsl(var(--foreground))",
+              backgroundColor: "hsl(var(--foreground) / 0.08)",
+              border: "1px solid hsl(var(--foreground) / 0.12)",
+              borderRadius: theme("borderRadius.md"),
+              paddingLeft: theme("spacing.1"),
+              paddingRight: theme("spacing.1"),
+              paddingTop: theme("spacing.0.5"),
+              paddingBottom: theme("spacing.0.5"),
+            },
+            ":not(pre) > code::before": { content: '""' },
+            ":not(pre) > code::after": { content: '""' },
+            pre: {
+              color: "hsl(var(--foreground))",
+              backgroundColor: "hsl(var(--foreground) / 0.06)",
+              border: "1px solid hsl(var(--foreground) / 0.12)",
+              borderRadius: theme("borderRadius.lg"),
+            },
+            blockquote: {
+              fontStyle: "normal",
+              borderLeftColor: "hsl(var(--foreground) / 0.15)",
+              color: "hsl(var(--foreground))",
+            },
+            "blockquote p:first-of-type::before": { content: '""' },
+            "blockquote p:last-of-type::after": { content: '""' },
+          },
+        },
+      }),
     },
   },
   plugins: [
     require("tailwindcss-animate"),
     require("@tailwindcss/container-queries"),
+    require("@tailwindcss/typography"),
   ],
 } satisfies Config;
 

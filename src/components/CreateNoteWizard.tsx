@@ -2,7 +2,6 @@
 
 import { useState, useId } from "react";
 import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { createNote } from "~/server/mutations";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,6 +9,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import * as ResizablePanel from "./resizable-panel";
+import Composer, { ComposerCommonButtons } from "./Composer";
 
 export default function CreateNoteWizard() {
   const [collapsibleState, setCollapsibleState] = useState<"open" | "closed">(
@@ -51,7 +51,7 @@ export default function CreateNoteWizard() {
   return (
     <ResizablePanel.Root
       value={collapsibleState}
-      className="liquid-glass mx-auto w-full max-w-[600px] rounded-lg"
+      className="liquid-glass mx-auto w-full max-w-[800px] rounded-lg"
       aria-expanded={collapsibleState === "open"}
       data-state={collapsibleState}
     >
@@ -70,32 +70,25 @@ export default function CreateNoteWizard() {
         className="flex flex-col gap-3 px-4 py-4"
         id={collapsibleId}
       >
-        <Input
-          value={note.title}
-          onChange={(e) => {
-            setNote((prevNote) => ({
-              ...prevNote,
-              title: e.target.value,
-            }));
-          }}
-          aria-label="Note title"
-          className="py-3 placeholder:text-base"
-          data-state={collapsibleState}
-          placeholder="Title"
-        />
         <div>
-          <Textarea
-            autoFocus
-            value={note.content}
+          <Input
+            value={note.title}
             onChange={(e) => {
               setNote((prevNote) => ({
                 ...prevNote,
-                content: e.target.value,
+                title: e.target.value,
               }));
             }}
-            aria-label="Note content"
-            placeholder="Create note"
+            aria-label="Note title"
+            className="py-3 text-base placeholder:text-base"
+            data-state={collapsibleState}
+            placeholder="Title"
           />
+        </div>
+        <div>
+          <Composer>
+            <ComposerCommonButtons />
+          </Composer>
         </div>
 
         <div className="flex justify-end gap-3">
