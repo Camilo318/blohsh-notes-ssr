@@ -9,7 +9,11 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import * as ResizablePanel from "./resizable-panel";
-import Composer, { ComposerCommonButtons } from "./Composer";
+import Composer, {
+  ComposerCommonButtons,
+  ComposerEditor,
+  ComposerSaveContentButton,
+} from "./Composer";
 
 export default function CreateNoteWizard() {
   const [collapsibleState, setCollapsibleState] = useState<"open" | "closed">(
@@ -51,7 +55,7 @@ export default function CreateNoteWizard() {
   return (
     <ResizablePanel.Root
       value={collapsibleState}
-      className="liquid-glass mx-auto w-full max-w-[800px] rounded-lg"
+      className="liquid-glass mx-auto w-full max-w-5xl rounded-lg "
       aria-expanded={collapsibleState === "open"}
       data-state={collapsibleState}
     >
@@ -67,7 +71,7 @@ export default function CreateNoteWizard() {
       <ResizablePanel.Content
         value="open"
         data-state={collapsibleState}
-        className="flex flex-col gap-3 px-4 py-4"
+        className="flex max-h-[600px] flex-col gap-3 px-4 py-4"
         id={collapsibleId}
       >
         <div>
@@ -80,43 +84,47 @@ export default function CreateNoteWizard() {
               }));
             }}
             aria-label="Note title"
-            className="py-3 text-base placeholder:text-base"
+            className="h-10 rounded-md py-3 text-base placeholder:text-base"
             data-state={collapsibleState}
             placeholder="Title"
           />
         </div>
-        <div>
-          <Composer>
-            <ComposerCommonButtons />
-          </Composer>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <Button
-            disabled={
-              (!note.content && !note.title) || createNoteMutation.isPending
-            }
-            onClick={() => {
-              createNoteMutation.mutate({ ...note, createdById: "" });
-            }}
-          >
-            {createNoteMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              "Create"
-            )}
-          </Button>
-          <Button
-            variant={"ghost"}
-            onClick={() => setCollapsibleState("closed")}
-            disabled={createNoteMutation.isPending}
-          >
-            Close
-          </Button>
-        </div>
+        <Composer>
+          <div className="flex-1 overflow-y-auto px-2 pb-2">
+            <div className="sticky top-0 z-10 -mb-2">
+              <ComposerCommonButtons />
+            </div>
+            <ComposerEditor />
+          </div>
+          <div className="flex justify-end gap-3">
+            <ComposerSaveContentButton
+              onSave={(content) => {
+                createNoteMutation.mutate({
+                  title: note.title,
+                  content,
+                  createdById: "",
+                });
+              }}
+              disabled={createNoteMutation.isPending}
+            >
+              {createNoteMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save"
+              )}
+            </ComposerSaveContentButton>
+            <Button
+              variant="ghost"
+              onClick={() => setCollapsibleState("closed")}
+              disabled={createNoteMutation.isPending}
+            >
+              Close
+            </Button>
+          </div>
+        </Composer>
       </ResizablePanel.Content>
     </ResizablePanel.Root>
   );

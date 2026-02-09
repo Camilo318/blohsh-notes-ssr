@@ -8,22 +8,12 @@ import {
   BookOpen,
   Tag,
   AlertCircle,
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  Smile,
   Download,
   Trash2Icon,
   Loader2,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import { Badge } from "~/components/ui/badge";
 import {
   NotionTagSelect,
@@ -46,6 +36,11 @@ import { toast } from "sonner";
 import NoteSideBarMobile from "./NoteSideBarMobile";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import Viewer from "./Viewer";
+import Composer, {
+  ComposerCommonButtons,
+  ComposerEditor,
+  ComposerSaveContentButton,
+} from "./Composer";
 
 interface NoteSideBarProps {
   isOpen: boolean;
@@ -79,7 +74,6 @@ export default function NoteSideBar({
   const attachments = note?.images ?? [];
 
   const [title, setTitle] = useState(note?.title ?? "");
-  const [content, setContent] = useState(note?.content ?? "");
   const [editableTags, setEditableTags] = useState<string[]>(note?.tags ?? []);
   const [editableImportance, setEditableImportance] = useState<Importance>(
     note?.importance ?? "Medium",
@@ -97,10 +91,9 @@ export default function NoteSideBar({
 
   useEffect(() => {
     setTitle(note?.title ?? "");
-    setContent(note?.content ?? "");
     setEditableTags(note?.tags ?? []);
     setEditableImportance(note?.importance ?? "Medium");
-  }, [note?.title, note?.content, note?.tags, note?.importance]);
+  }, [note?.title, note?.tags, note?.importance]);
 
   const editNoteMutation = useMutation({
     mutationFn: editTodo,
@@ -299,79 +292,45 @@ export default function NoteSideBar({
 
         {/* Text Editor */}
         <SidebarGroup>
-          <SidebarGroupContent>
-            {/* Formatting Toolbar */}
-            <div className="mb-2 flex items-center gap-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Bold className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Italic className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Underline className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Strikethrough className="h-4 w-4" />
-              </Button>
-              <div className="mx-1 h-6 w-px bg-gray-300" />
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <AlignLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <AlignCenter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <AlignRight className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <AlignJustify className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Text Area */}
-            <div className="text-composer">
-              {isLoading ? (
-                <div className="min-h-72 rounded-md bg-sidebar-accent p-3">
-                  <Skeleton className="h-full w-full" />
-                </div>
-              ) : (
-                <Textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="min-h-72 resize-none bg-sidebar-accent text-sm leading-relaxed"
-                  placeholder="Start writing your note..."
-                />
-              )}
-              {/* Actions */}
-              <div className="mt-3 flex items-center justify-between">
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    editNoteMutation.mutate({
-                      title,
-                      content,
-                      id: note?.id ?? "",
-                      importance: editableImportance,
-                      tags: editableTags,
-                    });
-                  }}
-                  disabled={isLoading || editNoteMutation.isPending}
-                >
-                  {editNoteMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save"
-                  )}
-                </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Smile className="h-4 w-4" />
-                </Button>
+          <SidebarGroupContent className="h-96 overflow-y-auto rounded-md">
+            {isLoading ? (
+              <div className="min-h-96 rounded-md bg-sidebar-accent p-3">
+                <Skeleton className="h-full w-full" />
               </div>
-            </div>
+            ) : (
+              <Composer key={note?.id} defaultContent={note?.content ?? ""}>
+                <div className="sticky top-0 z-10 -mb-2">
+                  <ComposerCommonButtons />
+                </div>
+                <div className="h-full p-1">
+                  <ComposerEditor />
+                  <div className="mt-3">
+                    <ComposerSaveContentButton
+                      size="sm"
+                      onSave={(content) => {
+                        editNoteMutation.mutate({
+                          title,
+                          content,
+                          id: note?.id ?? "",
+                          importance: editableImportance,
+                          tags: editableTags,
+                        });
+                      }}
+                      disabled={isLoading || editNoteMutation.isPending}
+                    >
+                      {editNoteMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Save"
+                      )}
+                    </ComposerSaveContentButton>
+                  </div>
+                </div>
+              </Composer>
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
 

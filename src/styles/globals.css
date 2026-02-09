@@ -71,7 +71,7 @@
     --note-content-bg: 0 0% 100%;
 
     /* Liquid glass effect custom properties */
-    --liquid-glass-bg: 255 255 255 / 0.4;
+    --liquid-glass-bg: hsl(0 0% 100% / 0.5);
     --liquid-glass-border: 255 255 255 / 0.4;
     --liquid-glass-shadow-outer: 0 0 0 / 0.05;
     --liquid-glass-shadow-inner: 0 0 0 / 0.02;

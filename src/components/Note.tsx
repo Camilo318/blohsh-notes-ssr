@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArchiveIcon,
   EditIcon,
@@ -13,13 +15,7 @@ import { getColorVariant } from "~/lib/note-colors";
 import { type SelectNote } from "~/server/db/schema";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useEdit } from "~/hooks/use-edit";
+import Composer, { ComposerEditor } from "./Composer";
 
 const Note = ({
   note,
@@ -62,7 +59,7 @@ const Note = ({
         <CardTitle
           className={cn("text-base font-semibold", colorVariant.headerText)}
         >
-          {note.title ?? "Note title"}
+          {title ?? "Note title"}
         </CardTitle>
 
         <div className="flex items-center gap-2">
@@ -140,7 +137,7 @@ const Note = ({
         }}
       >
         {/* Inner Content Card */}
-        <CardContent className="flex h-full flex-col gap-4 rounded-2xl bg-note-content-bg/80 py-6 backdrop-blur-sm">
+        <CardContent className="flex h-full w-full min-w-0 flex-col gap-4 overflow-hidden rounded-2xl bg-note-content-bg/80 py-6 backdrop-blur-sm">
           {/* Tags */}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
@@ -160,15 +157,12 @@ const Note = ({
             </div>
           )}
 
-          {/* Title */}
-          <CardTitle className="line-clamp-2 text-xl leading-snug text-card-foreground">
-            {title}
-          </CardTitle>
-
           {/* Content Preview */}
-          <CardDescription className="line-clamp-5 leading-relaxed">
-            {content}
-          </CardDescription>
+          <div className="line-clamp-5 min-h-0 w-full min-w-0 text-sm leading-relaxed text-muted-foreground">
+            <Composer key={content} defaultContent={content} editable={false}>
+              <ComposerEditor />
+            </Composer>
+          </div>
         </CardContent>
       </div>
     </Card>
