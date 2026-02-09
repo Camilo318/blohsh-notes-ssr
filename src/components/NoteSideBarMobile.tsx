@@ -8,22 +8,12 @@ import {
   BookOpen,
   Tag,
   AlertCircle,
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  Smile,
   Download,
   Trash2Icon,
   Loader2,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import { Badge } from "~/components/ui/badge";
 import {
   NotionTagSelect,
@@ -42,6 +32,12 @@ import Image from "next/image";
 import { deleteImage, editTodo } from "~/server/mutations";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import Viewer from "./Viewer";
+import Composer, {
+  ComposerCommonButtons,
+  ComposerEditor,
+  ComposerSaveContentButton,
+} from "./Composer";
 
 interface NoteSideBarMobileProps {
   isOpen: boolean;
@@ -75,19 +71,26 @@ export default function NoteSideBarMobile({
   const attachments = note?.images ?? [];
 
   const [title, setTitle] = useState(note?.title ?? "");
-  const [content, setContent] = useState(note?.content ?? "");
   const [editableTags, setEditableTags] = useState<string[]>(note?.tags ?? []);
   const [editableImportance, setEditableImportance] = useState<Importance>(
     note?.importance ?? "Medium",
   );
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
 
+  // Viewer state
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+
+  const openViewer = (index: number) => {
+    setViewerIndex(index);
+    setViewerOpen(true);
+  };
+
   useEffect(() => {
     setTitle(note?.title ?? "");
-    setContent(note?.content ?? "");
     setEditableTags(note?.tags ?? []);
     setEditableImportance(note?.importance ?? "Medium");
-  }, [note?.title, note?.content, note?.tags, note?.importance]);
+  }, [note?.title, note?.tags, note?.importance]);
 
   const editNoteMutation = useMutation({
     mutationFn: editTodo,
@@ -261,79 +264,48 @@ export default function NoteSideBarMobile({
           </div>
 
           {/* Text Editor */}
-          <div className="mb-6">
-            {/* Formatting Toolbar */}
-            <div className="mb-2 flex items-center gap-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Bold className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Italic className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Underline className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Strikethrough className="h-4 w-4" />
-              </Button>
-              <div className="mx-1 h-6 w-px bg-gray-300" />
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <AlignLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <AlignCenter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <AlignRight className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <AlignJustify className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Text Area */}
-            <div className="text-composer">
-              {isLoading ? (
-                <div className="min-h-72 rounded-md bg-sidebar-accent p-3">
-                  <Skeleton className="h-full w-full" />
-                </div>
-              ) : (
-                <Textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="min-h-72 resize-none bg-sidebar-accent text-sm leading-relaxed"
-                  placeholder="Start writing your note..."
-                />
-              )}
-              {/* Actions */}
-              <div className="mt-3 flex items-center justify-between">
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    editNoteMutation.mutate({
-                      title,
-                      content,
-                      id: note?.id ?? "",
-                      importance: editableImportance,
-                      tags: editableTags,
-                    });
-                  }}
-                  disabled={isLoading || editNoteMutation.isPending}
-                >
-                  {editNoteMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save"
-                  )}
-                </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Smile className="h-4 w-4" />
-                </Button>
+          <div className="mb-6 h-96 overflow-y-auto rounded-md">
+            {isLoading ? (
+              <div className="min-h-96 rounded-md bg-sidebar-accent p-3">
+                <Skeleton className="h-full w-full" />
               </div>
-            </div>
+            ) : (
+              <Composer
+                key={note?.id}
+                defaultContent={note?.content ?? ""}
+              >
+                <div className="sticky top-0 z-10 -mb-2">
+                  <ComposerCommonButtons />
+                </div>
+                <div className="h-full p-1">
+                  <ComposerEditor />
+                  <div className="mt-3">
+                    <ComposerSaveContentButton
+                      size="sm"
+                      onSave={(content) => {
+                        editNoteMutation.mutate({
+                          title,
+                          content,
+                          id: note?.id ?? "",
+                          importance: editableImportance,
+                          tags: editableTags,
+                        });
+                      }}
+                      disabled={isLoading || editNoteMutation.isPending}
+                    >
+                      {editNoteMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Save"
+                      )}
+                    </ComposerSaveContentButton>
+                  </div>
+                </div>
+              </Composer>
+            )}
           </div>
 
           {/* Attachments */}
@@ -367,7 +339,14 @@ export default function NoteSideBarMobile({
                       <Skeleton className="h-20 w-full rounded-lg" />
                     ) : (
                       <>
-                        <div className="relative h-20 w-20 overflow-hidden">
+                        <button
+                          type="button"
+                          className="relative h-20 w-20 cursor-pointer overflow-hidden focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          onClick={() =>
+                            openViewer(attachments.indexOf(attachment))
+                          }
+                          aria-label={`View ${attachment.altText ?? "image"}`}
+                        >
                           <Image
                             src={attachment.imageSrc ?? ""}
                             alt={attachment.altText ?? ""}
@@ -375,9 +354,9 @@ export default function NoteSideBarMobile({
                             height={100}
                             className="aspect-square object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
                           />
-                        </div>
+                        </button>
 
-                        <div className="flex flex-1 gap-3 p-2 pl-0">
+                        <div className="flex min-w-0 flex-1 gap-3 p-2 pl-0">
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium text-foreground">
                               {attachment.altText}
@@ -420,6 +399,15 @@ export default function NoteSideBarMobile({
           </div>
         </div>
       </DrawerContent>
+
+      {/* Image Viewer */}
+      <Viewer
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        images={attachments}
+        index={viewerIndex}
+        onIndexChange={setViewerIndex}
+      />
     </Drawer>
   );
 }
