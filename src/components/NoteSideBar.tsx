@@ -212,6 +212,50 @@ export default function NoteSideBar({
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Text Editor */}
+        <SidebarGroup className="pt-0">
+          <SidebarGroupContent className="flex max-h-[410px] flex-col rounded-md">
+            {isLoading ? (
+              <div className="h-full rounded-md bg-sidebar-accent">
+                <Skeleton className="h-full w-full" />
+              </div>
+            ) : (
+              <Composer key={note?.id} defaultContent={note?.content ?? ""}>
+                <div className="sticky top-0 z-10 -mb-2">
+                  <ComposerCommonButtons />
+                </div>
+                <div className="min-h-0 flex-1 overflow-y-auto p-1">
+                  <ComposerEditor />
+                </div>
+                <div className="mt-3">
+                  <ComposerSaveContentButton
+                    size="sm"
+                    onSave={(content) => {
+                      editNoteMutation.mutate({
+                        title,
+                        content,
+                        id: note?.id ?? "",
+                        importance: editableImportance,
+                        tags: editableTags,
+                      });
+                    }}
+                    disabled={isLoading || editNoteMutation.isPending}
+                  >
+                    {editNoteMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save"
+                    )}
+                  </ComposerSaveContentButton>
+                </div>
+              </Composer>
+            )}
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* Metadata */}
         <SidebarGroup>
           <SidebarGroupContent>
@@ -287,50 +331,6 @@ export default function NoteSideBar({
                 )}
               </div>
             </div>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Text Editor */}
-        <SidebarGroup>
-          <SidebarGroupContent className="h-96 overflow-y-auto rounded-md">
-            {isLoading ? (
-              <div className="min-h-96 rounded-md bg-sidebar-accent p-3">
-                <Skeleton className="h-full w-full" />
-              </div>
-            ) : (
-              <Composer key={note?.id} defaultContent={note?.content ?? ""}>
-                <div className="sticky top-0 z-10 -mb-2">
-                  <ComposerCommonButtons />
-                </div>
-                <div className="h-full p-1">
-                  <ComposerEditor />
-                  <div className="mt-3">
-                    <ComposerSaveContentButton
-                      size="sm"
-                      onSave={(content) => {
-                        editNoteMutation.mutate({
-                          title,
-                          content,
-                          id: note?.id ?? "",
-                          importance: editableImportance,
-                          tags: editableTags,
-                        });
-                      }}
-                      disabled={isLoading || editNoteMutation.isPending}
-                    >
-                      {editNoteMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        "Save"
-                      )}
-                    </ComposerSaveContentButton>
-                  </div>
-                </div>
-              </Composer>
-            )}
           </SidebarGroupContent>
         </SidebarGroup>
 
