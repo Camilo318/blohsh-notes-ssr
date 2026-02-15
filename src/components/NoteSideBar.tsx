@@ -103,6 +103,9 @@ export default function NoteSideBar({
           queryKey: ["noteToEdit", note?.id],
         }),
         queryClient.invalidateQueries({
+          queryKey: ["notes-grouped-by-tag"],
+        }),
+        queryClient.invalidateQueries({
           queryKey: ["tags"],
         }),
         queryClient.invalidateQueries({

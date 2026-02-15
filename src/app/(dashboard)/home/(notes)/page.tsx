@@ -18,8 +18,8 @@ export default async function Notes() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["notes", session.user.id, ""],
-    queryFn: () => getNotesByUser(session.user.id, ""),
+    queryKey: ["notes", "all", session.user.id, ""],
+    queryFn: () => getNotesByUser(session.user.id, { searchQuery: "" }),
   });
 
   return (

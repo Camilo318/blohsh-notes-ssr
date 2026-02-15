@@ -6,9 +6,9 @@ import {
 } from "@tanstack/react-query";
 import { getServerAuthSession } from "~/server/auth";
 import { getNotesByUser } from "~/server/queries";
-import FavoritesNotes from "./favorites";
+import RecentNotes from "./recent";
 
-export default async function FavoritesPage() {
+export default async function RecentPage() {
   const session = await getServerAuthSession();
 
   if (!session?.user) {
@@ -18,11 +18,10 @@ export default async function FavoritesPage() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["notes", "favorites", session.user.id, ""],
+    queryKey: ["notes", "recent", session.user.id, ""],
     queryFn: () =>
       getNotesByUser(session.user.id, {
         searchQuery: "",
-        favoritesOnly: true,
         sortBy: "updatedAt",
         sortDirection: "desc",
       }),
@@ -31,13 +30,13 @@ export default async function FavoritesPage() {
   return (
     <section className="@container/note-grid relative grid gap-3 px-4 pt-4">
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <FavoritesNotes user={session.user} />
+        <RecentNotes user={session.user} />
       </HydrationBoundary>
     </section>
   );
 }
 
 export const metadata = {
-  title: "Favorite Notes",
-  description: "Browse your favorite notes.",
+  title: "Recent Notes",
+  description: "Notes ordered by your latest edits.",
 };

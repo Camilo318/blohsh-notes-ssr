@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   pgTableCreator,
@@ -101,6 +102,7 @@ export const notes = createTable(
       .notNull()
       .default("Medium"),
     color: varchar("color", { length: 50 }),
+    isFavorite: boolean("is_favorite").notNull().default(false),
     createdById: text("createdById")
       .notNull()
       .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -113,6 +115,10 @@ export const notes = createTable(
   },
   (example) => ({
     createdByIdIdx: index("createdById_idx").on(example.createdById),
+    userFavoriteIdx: index("note_user_favorite_idx").on(
+      example.createdById,
+      example.isFavorite,
+    ),
   }),
 );
 

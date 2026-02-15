@@ -40,6 +40,9 @@ export default function CreateNoteWizard() {
           queryKey: ["notes"],
         }),
         queryClient.invalidateQueries({
+          queryKey: ["notes-grouped-by-tag"],
+        }),
+        queryClient.invalidateQueries({
           queryKey: ["tags"],
         }),
       ]);
