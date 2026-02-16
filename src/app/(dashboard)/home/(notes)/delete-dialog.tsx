@@ -36,6 +36,9 @@ export default function DeleteNoteDialog({
           queryKey: ["noteToEdit", noteId],
         }),
         queryClient.invalidateQueries({
+          queryKey: ["notes-grouped-by-tag"],
+        }),
+        queryClient.invalidateQueries({
           queryKey: ["notes"],
         }),
       ]);

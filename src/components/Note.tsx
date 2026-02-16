@@ -2,6 +2,8 @@
 
 import {
   ArchiveIcon,
+  Bookmark,
+  BookmarkCheck,
   EditIcon,
   ImagePlus,
   MoreHorizontal,
@@ -9,6 +11,8 @@ import {
   Plus,
   Trash2Icon,
 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { cn } from "~/lib/utils";
 import { getColorVariant } from "~/lib/note-colors";
@@ -24,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useEdit } from "~/hooks/use-edit";
+import { toggleNoteFavorite } from "~/server/mutations";
 import Composer, { ComposerEditor } from "./Composer";
 
 const Note = ({
@@ -40,9 +45,29 @@ const Note = ({
   const { title, content } = note;
   const noteImageKeys = note.images?.map((image) => image.key ?? "") ?? [];
   const { setIsEditing, setNoteToEdit, noteToEditId } = useEdit();
+  const queryClient = useQueryClient();
 
   const colorVariant = getColorVariant(note.id);
   const tags = note.tags ?? [];
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: () => toggleNoteFavorite(note.id),
+    onSuccess: async (updatedNote) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["notes"] }),
+        queryClient.invalidateQueries({ queryKey: ["notes-grouped-by-tag"] }),
+        queryClient.invalidateQueries({ queryKey: ["noteToEdit", note.id] }),
+      ]);
+
+      const isFavorite = updatedNote?.isFavorite ?? !note.isFavorite;
+      toast.success(
+        isFavorite ? "Added to favorites" : "Removed from favorites",
+      );
+    },
+    onError: () => {
+      toast.error("Could not update favorites");
+    },
+  });
 
   return (
     <Card
@@ -61,6 +86,18 @@ const Note = ({
         >
           {title ?? "Note title"}
         </CardTitle>
+
+        {note.isFavorite ? (
+          <span
+            className={cn(
+              "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-white/45 shadow-sm backdrop-blur-sm dark:bg-white/10",
+              colorVariant.border,
+            )}
+            aria-label="Favorited note"
+          >
+            <BookmarkCheck className="h-3.5 w-3.5" />
+          </span>
+        ) : null}
 
         <div className="flex items-center gap-2">
           <Button
@@ -100,6 +137,22 @@ const Note = ({
               >
                 <EditIcon className="h-4 w-4" />
                 Edit note
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer gap-2"
+                onClick={() => toggleFavoriteMutation.mutate()}
+                disabled={toggleFavoriteMutation.isPending}
+              >
+                {note.isFavorite ? (
+                  <BookmarkCheck className="h-4 w-4" />
+                ) : (
+                  <Bookmark className="h-4 w-4" />
+                )}
+                {toggleFavoriteMutation.isPending
+                  ? "Updating..."
+                  : note.isFavorite
+                    ? "Remove from favorites"
+                    : "Add to favorites"}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer gap-2"

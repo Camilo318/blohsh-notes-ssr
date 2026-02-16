@@ -129,6 +129,7 @@ export const editTodo = async ({
   notebookId,
   color,
   tags,
+  isFavorite,
 }: {
   title: string;
   content: string;
@@ -137,6 +138,7 @@ export const editTodo = async ({
   notebookId?: string | null;
   color?: string | null;
   tags?: string[];
+  isFavorite?: boolean;
 }) => {
   const session = await getServerAuthSession();
 
@@ -149,6 +151,7 @@ export const editTodo = async ({
     importance: string;
     notebookId: string | null;
     color: string | null;
+    isFavorite: boolean;
   }> = {
     title,
     content,
@@ -157,6 +160,7 @@ export const editTodo = async ({
   if (importance !== undefined) updateData.importance = importance;
   if (notebookId !== undefined) updateData.notebookId = notebookId;
   if (color !== undefined) updateData.color = color;
+  if (isFavorite !== undefined) updateData.isFavorite = isFavorite;
 
   const [updatedNote] = await db
     .update(notes)
@@ -168,5 +172,31 @@ export const editTodo = async ({
   if (updatedNote && tags !== undefined) {
     await syncNoteTags(updatedNote.id, session.user.id, tags);
   }
+  return updatedNote;
+};
+
+export const toggleNoteFavorite = async (id: string) => {
+  const session = await getServerAuthSession();
+
+  if (!session?.user.id) throw new Error("Unauthorized");
+
+  const existingNote = await db.query.notes.findFirst({
+    columns: {
+      id: true,
+      isFavorite: true,
+    },
+    where: and(eq(notes.id, id), eq(notes.createdById, session.user.id)),
+  });
+
+  if (!existingNote) {
+    throw new Error("Note not found");
+  }
+
+  const [updatedNote] = await db
+    .update(notes)
+    .set({ isFavorite: !existingNote.isFavorite })
+    .where(and(eq(notes.id, id), eq(notes.createdById, session.user.id)))
+    .returning();
+
   return updatedNote;
 };
