@@ -139,15 +139,33 @@ export type NotesByTagGroup = {
   isUntagged: boolean;
 };
 
+function normalizeGroupedByTagOptions(
+  optionsOrSearchQuery: GetNotesByUserOptions | string = "",
+): NormalizedGetNotesByUserOptions {
+  if (typeof optionsOrSearchQuery === "string") {
+    return {
+      searchQuery: optionsOrSearchQuery,
+      sortBy: "updatedAt",
+      sortDirection: "desc",
+      favoritesOnly: false,
+    };
+  }
+
+  return {
+    searchQuery: optionsOrSearchQuery.searchQuery ?? "",
+    sortBy: optionsOrSearchQuery.sortBy ?? "updatedAt",
+    sortDirection: optionsOrSearchQuery.sortDirection ?? "desc",
+    favoritesOnly: optionsOrSearchQuery.favoritesOnly ?? false,
+  };
+}
+
 export const getNotesGroupedByTag = async (
   userId: string,
-  searchQuery = "",
+  optionsOrSearchQuery: GetNotesByUserOptions | string = "",
 ) => {
-  const userNotes = await getNotesByUser(userId, {
-    searchQuery,
-    sortBy: "updatedAt",
-    sortDirection: "desc",
-  });
+  const options = normalizeGroupedByTagOptions(optionsOrSearchQuery);
+
+  const userNotes = await getNotesByUser(userId, options);
 
   const notesByTag = new Map<string, Awaited<ReturnType<typeof getNotesByUser>>>();
   const untaggedNotes: Awaited<ReturnType<typeof getNotesByUser>> = [];

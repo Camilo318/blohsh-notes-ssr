@@ -1,5 +1,6 @@
 "use client";
 
+import { type ReactNode } from "react";
 import { Search, X } from "lucide-react";
 import { ModeToggle } from "~/components/ModeToggle";
 import { SidebarTrigger } from "~/components/ui/sidebar";
@@ -14,12 +15,14 @@ type NotesRouteTopBarProps = {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   placeholder?: string;
+  rightActions?: ReactNode;
 };
 
 export default function NotesRouteTopBar({
   searchQuery,
   onSearchChange,
   placeholder = "Search notes",
+  rightActions,
 }: NotesRouteTopBarProps) {
   return (
     <div className="-mx-4 -mt-4 border-b border-border bg-background/80 px-4 py-3 backdrop-blur-sm">
@@ -52,6 +55,8 @@ export default function NotesRouteTopBar({
             </InputGroupAddon>
           ) : null}
         </InputGroup>
+
+        {rightActions}
 
         <ModeToggle
           variant="ghost"

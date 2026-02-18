@@ -10,14 +10,37 @@ import { useDebounce } from "~/hooks/useDebounce";
 import { getNotesGroupedByTag } from "~/server/queries";
 import NotesGrid from "~/components/NotesGrid";
 import NotesRouteTopBar from "~/components/NotesRouteTopBar";
+import NotesFilterPopover, {
+  type NotesFilterState,
+} from "~/components/NotesFilterPopover";
 
 export default function TagsNotes({ user }: { user: Session["user"] }) {
+  const baselineFilters: NotesFilterState = {
+    sortBy: "updatedAt",
+    sortDirection: "desc",
+    favoritesOnly: false,
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<NotesFilterState>(baselineFilters);
   const debouncedSearchQuery = useDebounce(searchQuery, 450);
 
   const { data: groups = [], isLoading } = useQuery({
-    queryKey: ["notes-grouped-by-tag", user.id, debouncedSearchQuery],
-    queryFn: () => getNotesGroupedByTag(user.id, debouncedSearchQuery),
+    queryKey: [
+      "notes-grouped-by-tag",
+      user.id,
+      debouncedSearchQuery,
+      filters.sortBy,
+      filters.sortDirection,
+      filters.favoritesOnly,
+    ],
+    queryFn: () =>
+      getNotesGroupedByTag(user.id, {
+        searchQuery: debouncedSearchQuery,
+        sortBy: filters.sortBy,
+        sortDirection: filters.sortDirection,
+        favoritesOnly: filters.favoritesOnly,
+      }),
   });
 
   const totalGroupedCards = useMemo(
@@ -45,6 +68,13 @@ export default function TagsNotes({ user }: { user: Session["user"] }) {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         placeholder="Search notes by title or content"
+        rightActions={
+          <NotesFilterPopover
+            value={filters}
+            onChange={setFilters}
+            baseline={baselineFilters}
+          />
+        }
       />
 
       <div className="relative mt-4 overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-background via-background to-secondary/35 p-4 shadow-sm">

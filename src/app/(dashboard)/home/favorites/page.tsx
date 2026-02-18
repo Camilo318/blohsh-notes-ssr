@@ -18,7 +18,7 @@ export default async function FavoritesPage() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["notes", "favorites", session.user.id, ""],
+    queryKey: ["notes", "favorites", session.user.id, "", "updatedAt", "desc", true],
     queryFn: () =>
       getNotesByUser(session.user.id, {
         searchQuery: "",

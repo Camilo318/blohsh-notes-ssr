@@ -18,7 +18,7 @@ export default async function RecentPage() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["notes", "recent", session.user.id, ""],
+    queryKey: ["notes", "recent", session.user.id, "", "updatedAt", "desc", false],
     queryFn: () =>
       getNotesByUser(session.user.id, {
         searchQuery: "",

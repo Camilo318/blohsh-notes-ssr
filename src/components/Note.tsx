@@ -183,7 +183,7 @@ const Note = ({
       </CardHeader>
       {/* Outer Content Card */}
       <div
-        className="cursor-pointer p-4 transition-all duration-300 ease-out hover:scale-[1.02]"
+        className="will-change-box-shadow cursor-pointer p-4 transition-[transform,box-shadow] duration-200 ease-out will-change-transform hover:scale-[1.02] hover:shadow-lg"
         onClick={() => {
           setIsEditing(true);
           setNoteToEdit(note.id);

@@ -18,8 +18,21 @@ export default async function TagsPage() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["notes-grouped-by-tag", session.user.id, ""],
-    queryFn: () => getNotesGroupedByTag(session.user.id, ""),
+    queryKey: [
+      "notes-grouped-by-tag",
+      session.user.id,
+      "",
+      "updatedAt",
+      "desc",
+      false,
+    ],
+    queryFn: () =>
+      getNotesGroupedByTag(session.user.id, {
+        searchQuery: "",
+        sortBy: "updatedAt",
+        sortDirection: "desc",
+        favoritesOnly: false,
+      }),
   });
 
   return (

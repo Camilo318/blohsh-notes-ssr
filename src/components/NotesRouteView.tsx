@@ -8,6 +8,9 @@ import { useDebounce } from "~/hooks/useDebounce";
 import CreateNoteWizard from "~/components/CreateNoteWizard";
 import NotesGrid from "~/components/NotesGrid";
 import NotesRouteTopBar from "~/components/NotesRouteTopBar";
+import NotesFilterPopover, {
+  type NotesFilterState,
+} from "~/components/NotesFilterPopover";
 
 type NotesRouteViewProps = {
   user: Session["user"];
@@ -28,15 +31,35 @@ export default function NotesRouteView({
   emptyMessage,
   searchEmptyMessage,
 }: NotesRouteViewProps) {
+  const baselineFilters: NotesFilterState = {
+    sortBy: queryOptions?.sortBy ?? "createdAt",
+    sortDirection: queryOptions?.sortDirection ?? "desc",
+    favoritesOnly: queryOptions?.favoritesOnly ?? false,
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<NotesFilterState>(baselineFilters);
   const debouncedSearchQuery = useDebounce(searchQuery, 450);
 
+  const effectiveFavoritesOnly =
+    queryOptions?.favoritesOnly === true ? true : filters.favoritesOnly;
+
   const { data: userNotes = [], isLoading } = useQuery({
-    queryKey: ["notes", routeKey, user.id, debouncedSearchQuery],
+    queryKey: [
+      "notes",
+      routeKey,
+      user.id,
+      debouncedSearchQuery,
+      filters.sortBy,
+      filters.sortDirection,
+      effectiveFavoritesOnly,
+    ],
     queryFn: () =>
       getNotesByUser(user.id, {
         searchQuery: debouncedSearchQuery,
-        ...queryOptions,
+        sortBy: filters.sortBy,
+        sortDirection: filters.sortDirection,
+        favoritesOnly: effectiveFavoritesOnly,
       }),
   });
 
@@ -46,6 +69,14 @@ export default function NotesRouteView({
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         placeholder={searchPlaceholder}
+        rightActions={
+          <NotesFilterPopover
+            value={{ ...filters, favoritesOnly: effectiveFavoritesOnly }}
+            onChange={setFilters}
+            baseline={baselineFilters}
+            showFavoritesToggle={queryOptions?.favoritesOnly !== true}
+          />
+        }
       />
 
       {showCreateNote ? (

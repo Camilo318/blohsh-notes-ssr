@@ -308,48 +308,6 @@ export default function NoteSideBarMobile({
             </div>
           </div>
 
-          {/* Text Editor */}
-          <div className="mb-6 h-96 overflow-y-auto rounded-md">
-            {isLoading ? (
-              <div className="min-h-96 rounded-md bg-sidebar-accent p-3">
-                <Skeleton className="h-full w-full" />
-              </div>
-            ) : (
-              <Composer key={note?.id} defaultContent={note?.content ?? ""}>
-                <div className="sticky top-0 z-10 -mb-2">
-                  <ComposerCommonButtons />
-                </div>
-                <div className="h-full p-1">
-                  <ComposerEditor />
-                  <div className="mt-3">
-                    <ComposerSaveContentButton
-                      size="sm"
-                      onSave={(content) => {
-                        editNoteMutation.mutate({
-                          title,
-                          content,
-                          id: note?.id ?? "",
-                          importance: editableImportance,
-                          tags: editableTags,
-                        });
-                      }}
-                      disabled={isLoading || editNoteMutation.isPending}
-                    >
-                      {editNoteMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 size-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        "Save"
-                      )}
-                    </ComposerSaveContentButton>
-                  </div>
-                </div>
-              </Composer>
-            )}
-          </div>
-
           {/* Attachments */}
           <div>
             <div className="mb-3 flex items-center justify-between">
