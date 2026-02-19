@@ -1,5 +1,7 @@
 "use client";
 
+import { createContext, type ReactNode, useMemo, use } from "react";
+
 import {
   ArchiveIcon,
   Bookmark,
@@ -11,7 +13,11 @@ import {
   Plus,
   Trash2Icon,
 } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  type UseMutationResult,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { cn } from "~/lib/utils";
@@ -31,43 +37,63 @@ import { useEdit } from "~/hooks/use-edit";
 import { toggleNoteFavorite } from "~/server/mutations";
 import Composer, { ComposerEditor } from "./Composer";
 
-const Note = ({
-  note,
-  className,
-  openDeleteDialog,
-  openAddImageDialog,
-}: {
+type NoteContextProps = {
+  note: SelectNote;
+  openDeleteDialog: (noteId: string, noteImageKeys: string[]) => void;
+  openAddImageDialog: (noteId: string) => void;
+  colorVariant: ReturnType<typeof getColorVariant>;
+  setIsEditing: (isEditing: boolean) => void;
+  setNoteToEdit: (noteId: string) => void;
+  noteToEditId: string | number | null;
+  toggleFavoriteMutation: UseMutationResult<
+    Awaited<ReturnType<typeof toggleNoteFavorite>>,
+    Error,
+    void
+  >;
+  noteImageKeys: string[];
+};
+
+const NoteContext = createContext<NoteContextProps | null>(null);
+
+function useNote() {
+  const context = use(NoteContext);
+  if (!context) {
+    throw new Error("useNote must be used within a NoteProvider");
+  }
+  return context;
+}
+
+type NoteProps = {
   note: SelectNote;
   className?: string;
   openDeleteDialog: (noteId: string, noteImageKeys: string[]) => void;
   openAddImageDialog: (noteId: string) => void;
-}) => {
+};
+
+type DemoNoteProps = {
+  note: SelectNote;
+  className?: string;
+};
+
+type NoteCardBaseProps = {
+  note: SelectNote;
+  className?: string;
+  colorVariant: ReturnType<typeof getColorVariant>;
+  isEditing: boolean;
+  headerActions?: ReactNode;
+  onNoteOpen?: () => void;
+};
+
+const NoteCardBase = ({
+  note,
+  className,
+  colorVariant,
+  isEditing,
+  headerActions,
+  onNoteOpen,
+}: NoteCardBaseProps) => {
   const { title, content } = note;
-  const noteImageKeys = note.images?.map((image) => image.key ?? "") ?? [];
-  const { setIsEditing, setNoteToEdit, noteToEditId } = useEdit();
-  const queryClient = useQueryClient();
-
-  const colorVariant = getColorVariant(note.id);
   const tags = note.tags ?? [];
-
-  const toggleFavoriteMutation = useMutation({
-    mutationFn: () => toggleNoteFavorite(note.id),
-    onSuccess: async (updatedNote) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["notes"] }),
-        queryClient.invalidateQueries({ queryKey: ["notes-grouped-by-tag"] }),
-        queryClient.invalidateQueries({ queryKey: ["noteToEdit", note.id] }),
-      ]);
-
-      const isFavorite = updatedNote?.isFavorite ?? !note.isFavorite;
-      toast.success(
-        isFavorite ? "Added to favorites" : "Removed from favorites",
-      );
-    },
-    onError: () => {
-      toast.error("Could not update favorites");
-    },
-  });
 
   return (
     <Card
@@ -75,7 +101,7 @@ const Note = ({
         className,
         "liquid-glass group relative overflow-hidden rounded-2xl",
         colorVariant.bg,
-        noteToEditId === note.id && "ring-2 ring-primary",
+        isEditing && "ring-2 ring-primary",
         colorVariant.headerText,
       )}
     >
@@ -99,95 +125,17 @@ const Note = ({
           </span>
         ) : null}
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              colorVariant.headerText,
-              "hover:bg-white/20 dark:hover:bg-white/10",
-            )}
-            onClick={() => openAddImageDialog(note.id)}
-          >
-            <Plus className="h-4 w-4" />
-            <span className="sr-only">Add</span>
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  colorVariant.headerText,
-                  "hover:bg-white/20 dark:hover:bg-white/10",
-                )}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Options</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                className="cursor-pointer gap-2"
-                onClick={() => {
-                  setIsEditing(true);
-                  setNoteToEdit(note.id);
-                }}
-              >
-                <EditIcon className="h-4 w-4" />
-                Edit note
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer gap-2"
-                onClick={() => toggleFavoriteMutation.mutate()}
-                disabled={toggleFavoriteMutation.isPending}
-              >
-                {note.isFavorite ? (
-                  <BookmarkCheck className="h-4 w-4" />
-                ) : (
-                  <Bookmark className="h-4 w-4" />
-                )}
-                {toggleFavoriteMutation.isPending
-                  ? "Updating..."
-                  : note.isFavorite
-                    ? "Remove from favorites"
-                    : "Add to favorites"}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer gap-2"
-                onClick={() => openAddImageDialog(note.id)}
-              >
-                <ImagePlus className="h-4 w-4" />
-                Add image
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer gap-2">
-                <PaletteIcon className="h-4 w-4" />
-                Change color
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer gap-2">
-                <ArchiveIcon className="h-4 w-4" />
-                Archive
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="cursor-pointer gap-2 text-destructive focus:text-destructive"
-                onClick={() => openDeleteDialog(note.id, noteImageKeys)}
-              >
-                <Trash2Icon className="h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {headerActions ? (
+          <div className="flex items-center gap-2">{headerActions}</div>
+        ) : null}
       </CardHeader>
       {/* Outer Content Card */}
       <div
-        className="will-change-box-shadow cursor-pointer p-4 transition-[transform,box-shadow] duration-200 ease-out will-change-transform hover:scale-[1.02] hover:shadow-lg"
-        onClick={() => {
-          setIsEditing(true);
-          setNoteToEdit(note.id);
-        }}
+        className={cn(
+          "will-change-box-shadow p-4 transition-[transform,box-shadow] duration-200 ease-out will-change-transform",
+          "cursor-pointer hover:scale-[1.02] hover:shadow-lg",
+        )}
+        onClick={onNoteOpen}
       >
         {/* Inner Content Card */}
         <CardContent className="flex h-full w-full min-w-0 flex-col gap-4 overflow-hidden rounded-2xl bg-note-content-bg/80 py-6 backdrop-blur-sm">
@@ -222,6 +170,194 @@ const Note = ({
   );
 };
 
+const Note = ({
+  note,
+  className,
+  openDeleteDialog,
+  openAddImageDialog,
+}: NoteProps) => {
+  const noteImageKeys = useMemo(
+    () => note.images?.map((image) => image.key ?? "") ?? [],
+    [note.images],
+  );
+  const { setIsEditing, setNoteToEdit, noteToEditId } = useEdit();
+  const queryClient = useQueryClient();
+
+  const colorVariant = getColorVariant(note.id);
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: () => toggleNoteFavorite(note.id),
+    onSuccess: async (updatedNote) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["notes"] }),
+        queryClient.invalidateQueries({ queryKey: ["notes-grouped-by-tag"] }),
+        queryClient.invalidateQueries({ queryKey: ["noteToEdit", note.id] }),
+      ]);
+
+      const isFavorite = updatedNote?.isFavorite ?? !note.isFavorite;
+      toast.success(
+        isFavorite ? "Added to favorites" : "Removed from favorites",
+      );
+    },
+    onError: () => {
+      toast.error("Could not update favorites");
+    },
+  });
+
+  const providerValue = useMemo(
+    () => ({
+      note,
+      openDeleteDialog,
+      openAddImageDialog,
+      colorVariant,
+      setIsEditing,
+      setNoteToEdit,
+      noteToEditId,
+      toggleFavoriteMutation,
+      noteImageKeys,
+    }),
+    [
+      note,
+      openDeleteDialog,
+      openAddImageDialog,
+      colorVariant,
+      setIsEditing,
+      setNoteToEdit,
+      noteToEditId,
+      toggleFavoriteMutation,
+      noteImageKeys,
+    ],
+  );
+
+  const openNoteEditor = () => {
+    setIsEditing(true);
+    setNoteToEdit(note.id);
+  };
+
+  return (
+    <NoteContext.Provider value={providerValue}>
+      <NoteCardBase
+        note={note}
+        className={className}
+        colorVariant={colorVariant}
+        isEditing={noteToEditId === note.id}
+        onNoteOpen={openNoteEditor}
+        headerActions={<NoteActions />}
+      />
+    </NoteContext.Provider>
+  );
+};
+
 Note.displayName = "Note";
+
+export const DemoNote = ({ note, className }: DemoNoteProps) => {
+  const colorVariant = getColorVariant(note.id);
+
+  return (
+    <NoteCardBase
+      note={note}
+      className={className}
+      colorVariant={colorVariant}
+      isEditing={false}
+    />
+  );
+};
+
+export const NoteActions = () => {
+  const {
+    colorVariant,
+    openAddImageDialog,
+    note,
+    setIsEditing,
+    setNoteToEdit,
+    toggleFavoriteMutation,
+    openDeleteDialog,
+    noteImageKeys,
+  } = useNote();
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="ghost"
+        size="icon"
+        className={cn(
+          colorVariant.headerText,
+          "hover:bg-white/20 dark:hover:bg-white/10",
+        )}
+        onClick={() => openAddImageDialog(note.id)}
+      >
+        <Plus className="h-4 w-4" />
+        <span className="sr-only">Add</span>
+      </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              colorVariant.headerText,
+              "hover:bg-white/20 dark:hover:bg-white/10",
+            )}
+          >
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Options</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem
+            className="cursor-pointer gap-2"
+            onClick={() => {
+              setIsEditing(true);
+              setNoteToEdit(note.id);
+            }}
+          >
+            <EditIcon className="h-4 w-4" />
+            Edit note
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer gap-2"
+            onClick={() => toggleFavoriteMutation.mutate()}
+            disabled={toggleFavoriteMutation.isPending}
+          >
+            {note.isFavorite ? (
+              <BookmarkCheck className="h-4 w-4" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
+            {toggleFavoriteMutation.isPending
+              ? "Updating..."
+              : note.isFavorite
+                ? "Remove from favorites"
+                : "Add to favorites"}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer gap-2"
+            onClick={() => openAddImageDialog(note.id)}
+          >
+            <ImagePlus className="h-4 w-4" />
+            Add image
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer gap-2">
+            <PaletteIcon className="h-4 w-4" />
+            Change color
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer gap-2">
+            <ArchiveIcon className="h-4 w-4" />
+            Archive
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="cursor-pointer gap-2 text-destructive focus:text-destructive"
+            onClick={() => openDeleteDialog(note.id, noteImageKeys)}
+          >
+            <Trash2Icon className="h-4 w-4" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+};
 
 export default Note;

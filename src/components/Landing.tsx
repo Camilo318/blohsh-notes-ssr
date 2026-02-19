@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import LandingHeader from "./LandingHeader";
+import DemoMuralDialog from "./DemoMuralDialog";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { noteColorVariants, type NoteColorVariant } from "~/lib/note-colors";
@@ -155,6 +157,7 @@ export function Landing() {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { data: session } = useSession();
   const router = useRouter();
+  const [isDemoMuralOpen, setIsDemoMuralOpen] = useState(false);
 
   const goToApp = () => {
     if (session?.user.id) {
@@ -168,6 +171,10 @@ export function Landing() {
   return (
     <div className="relative min-h-screen overflow-x-clip bg-background text-foreground">
       <LandingHeader />
+      <DemoMuralDialog
+        open={isDemoMuralOpen}
+        onOpenChange={setIsDemoMuralOpen}
+      />
 
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
@@ -253,7 +260,7 @@ export function Landing() {
                 size="lg"
                 variant="outline"
                 className="h-12 rounded-xl border-border/80 bg-card/40 px-6"
-                onClick={() => router.push("/home")}
+                onClick={() => setIsDemoMuralOpen(true)}
               >
                 View demo notes
               </Button>
