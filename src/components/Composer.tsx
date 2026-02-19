@@ -269,13 +269,15 @@ export const ComposerSaveContentButton = ({
   };
 
   const canSave =
-    editorState?.doc.content.size && editorState.doc.content.size > 0;
+    editor?.isEditable &&
+    editorState?.doc.textContent &&
+    editorState.doc.textContent.length > 0;
 
   return (
     <Button
       {...buttonProps}
       onClick={handleSave}
-      disabled={externalDisabled ?? !canSave}
+      disabled={externalDisabled ? externalDisabled : !canSave}
     >
       {children}
     </Button>

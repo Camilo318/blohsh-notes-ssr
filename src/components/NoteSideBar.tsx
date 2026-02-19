@@ -217,7 +217,7 @@ export default function NoteSideBar({
 
         {/* Text Editor */}
         <SidebarGroup className="pt-0">
-          <SidebarGroupContent className="flex max-h-[410px] flex-col rounded-md">
+          <SidebarGroupContent className="flex h-[450px] flex-col overflow-y-auto rounded-md">
             {isLoading ? (
               <div className="h-full rounded-md bg-sidebar-accent">
                 <Skeleton className="h-full w-full" />
@@ -227,7 +227,7 @@ export default function NoteSideBar({
                 <div className="sticky top-0 z-10 -mb-2">
                   <ComposerCommonButtons />
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto p-1">
+                <div className="flex-1 p-1">
                   <ComposerEditor />
                 </div>
                 <div className="mt-3">
