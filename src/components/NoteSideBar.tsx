@@ -36,11 +36,8 @@ import { toast } from "sonner";
 import NoteSideBarMobile from "./NoteSideBarMobile";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import Viewer from "./Viewer";
-import Composer, {
-  ComposerCommonButtons,
-  ComposerEditor,
-  ComposerSaveContentButton,
-} from "./Composer";
+import Composer, { ComposerCommonButtons, ComposerEditor } from "./Composer";
+import { useDebouncedCallback } from "~/hooks/useDebouncedCallback";
 
 interface NoteSideBarProps {
   isOpen: boolean;
@@ -83,6 +80,11 @@ export default function NoteSideBar({
   // Viewer state
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  type SaveNoteArgs = Omit<Partial<Parameters<typeof editTodo>[number]>, "id">;
+
+  const saveNote = useDebouncedCallback((args: SaveNoteArgs) => {
+    editNoteMutation.mutate({ ...args, id: note?.id ?? "" });
+  }, 1000);
 
   const openViewer = (index: number) => {
     setViewerIndex(index);
@@ -114,6 +116,7 @@ export default function NoteSideBar({
       ]);
       toast.success("Note saved successfully", {
         description: "Your changes have been saved.",
+        position: "top-center",
       });
     },
     onError: (error) => {
@@ -206,7 +209,10 @@ export default function NoteSideBar({
               ) : (
                 <Input
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    saveNote({ title: e.target.value });
+                  }}
                   className="h-7 bg-sidebar-accent text-lg font-medium"
                   placeholder="Note title"
                 />
@@ -223,7 +229,13 @@ export default function NoteSideBar({
                 <Skeleton className="h-full w-full" />
               </div>
             ) : (
-              <Composer key={note?.id} defaultContent={note?.content ?? ""}>
+              <Composer
+                key={note?.id}
+                defaultContent={note?.content ?? ""}
+                onUpdate={(content) => {
+                  saveNote({ content });
+                }}
+              >
                 <div className="sticky top-0 z-10 -mb-2">
                   <ComposerCommonButtons />
                 </div>
@@ -231,28 +243,16 @@ export default function NoteSideBar({
                   <ComposerEditor />
                 </div>
                 <div className="mt-3">
-                  <ComposerSaveContentButton
-                    size="sm"
-                    onSave={(content) => {
-                      editNoteMutation.mutate({
-                        title,
-                        content,
-                        id: note?.id ?? "",
-                        importance: editableImportance,
-                        tags: editableTags,
-                      });
-                    }}
-                    disabled={isLoading || editNoteMutation.isPending}
-                  >
-                    {editNoteMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      "Save"
-                    )}
-                  </ComposerSaveContentButton>
+                  {editNoteMutation.isPending ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      Autosave ON: Changes are saved automatically.
+                    </span>
+                  )}
                 </div>
               </Composer>
             )}
@@ -298,7 +298,10 @@ export default function NoteSideBar({
                   <div className="pl-6">
                     <NotionTagSelect
                       value={editableTags}
-                      onChange={setEditableTags}
+                      onChange={(tags) => {
+                        setEditableTags(tags);
+                        saveNote({ tags });
+                      }}
                       placeholder="Add tags..."
                       options={tags.map((tag) => ({
                         id: tag.id,
@@ -328,7 +331,10 @@ export default function NoteSideBar({
                   <div className="pl-6">
                     <ImportanceSelect
                       value={editableImportance}
-                      onChange={setEditableImportance}
+                      onChange={(importance) => {
+                        setEditableImportance(importance);
+                        saveNote({ importance });
+                      }}
                     />
                   </div>
                 )}
@@ -372,7 +378,7 @@ export default function NoteSideBar({
                       <>
                         <button
                           type="button"
-                          className="relative h-20 w-20 cursor-pointer overflow-hidden focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          className="group/image-button relative h-20 w-20 cursor-pointer overflow-hidden focus:outline-none"
                           onClick={() =>
                             openViewer(attachments.indexOf(attachment))
                           }
@@ -383,7 +389,9 @@ export default function NoteSideBar({
                             alt={attachment.altText ?? ""}
                             width={100}
                             height={100}
-                            className="aspect-square object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
+                            className="aspect-square object-cover object-center transition-transform duration-300 ease-out will-change-transform hover:scale-110
+                            group-active/image-button:scale-100
+                            "
                           />
                         </button>
 

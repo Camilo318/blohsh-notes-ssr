@@ -1,7 +1,17 @@
 import AppSidebar from "~/components/AppSidebar";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import NoteSideBarDemo from "~/components/NoteSideBarDemo";
-import { Toaster } from "~/components/ui/sonner";
+import dynamic from "next/dynamic";
+
+const Toaster = dynamic(
+  () => import("~/components/ui/sonner").then((mod) => mod.Toaster),
+  {
+    loading: () => (
+      <div className="h-10 animate-pulse rounded-xl bg-background" />
+    ),
+    ssr: false,
+  },
+);
 
 export default function HomeLayout({
   children,

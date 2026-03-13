@@ -131,8 +131,8 @@ export const editTodo = async ({
   tags,
   isFavorite,
 }: {
-  title: string;
-  content: string;
+  title?: string;
+  content?: string;
   id: string;
   importance?: Importance;
   notebookId?: string | null;
@@ -161,6 +161,16 @@ export const editTodo = async ({
   if (notebookId !== undefined) updateData.notebookId = notebookId;
   if (color !== undefined) updateData.color = color;
   if (isFavorite !== undefined) updateData.isFavorite = isFavorite;
+
+  console.log("updateData", updateData);
+  // if only tags are provided, update the tags only
+  if (
+    Object.values(updateData).every((value) => value === undefined) &&
+    tags !== undefined
+  ) {
+    await syncNoteTags(id, session.user.id, tags);
+    return;
+  }
 
   const [updatedNote] = await db
     .update(notes)

@@ -3,14 +3,32 @@
 import { useMemo } from "react";
 import { Check, SlidersHorizontal, Star } from "lucide-react";
 import { type NoteSortBy, type NoteSortDirection } from "~/server/queries";
+import dynamic from "next/dynamic";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
+
+const Popover = dynamic(
+  () => import("~/components/ui/popover").then((mod) => mod.Popover),
+  {
+    loading: () => (
+      <div className="h-10 animate-pulse rounded-xl bg-background" />
+    ),
+    ssr: false,
+  },
+);
+const PopoverContent = dynamic(
+  () => import("~/components/ui/popover").then((mod) => mod.PopoverContent),
+  {
+    ssr: false,
+  },
+);
+const PopoverTrigger = dynamic(
+  () => import("~/components/ui/popover").then((mod) => mod.PopoverTrigger),
+  {
+    ssr: false,
+  },
+);
 import { cn } from "~/lib/utils";
 
 export type NotesFilterState = {

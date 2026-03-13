@@ -29,10 +29,12 @@ const Composer = ({
   children,
   defaultContent = "<p>Hello World! 🌎️</p>",
   editable = true,
+  onUpdate,
 }: {
   children: React.ReactNode;
   defaultContent?: string;
   editable?: boolean;
+  onUpdate?: (content: string) => void;
 }) => {
   const editor = useEditor({
     extensions: [
@@ -64,6 +66,10 @@ const Composer = ({
         "aria-label": "Main content area, start typing to enter text.",
       },
     },
+  });
+
+  editor?.on("update", () => {
+    onUpdate?.(JSON.stringify(editor.getJSON()));
   });
 
   const providerValue = useMemo(
